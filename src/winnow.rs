@@ -1,3 +1,19 @@
+use std::hash::BuildHasher;
+use std::hash::{DefaultHasher, Hash, Hasher};
+
+pub fn k_gram(text: &str, k: usize) -> Vec<u64> {
+    let mut hashes = Vec::new();
+
+    for i in 0..text.len().saturating_sub(k) {
+        let kgram = &text[i..i + k];
+        let mut hasher = DefaultHasher::new();
+        kgram.hash(&mut hasher);
+        hashes.push(hasher.finish());
+    }
+
+    hashes
+}
+
 pub fn winnowing<T>(hashes: T, window_size: usize) -> Vec<(u64, usize)>
 where
     T: AsRef<[u64]>,
@@ -35,6 +51,8 @@ fn rightmost_minimal(window: &[u64]) -> (u64, usize) {
 
 #[cfg(test)]
 mod tests {
+    use crate::winnow::k_gram;
+
     #[test]
     fn it_works() {
         let hashes = [
@@ -45,6 +63,33 @@ mod tests {
             super::winnowing(&hashes, window_size),
             // [(17, 3), (17, 6), (8, 8), (39, 11), (17, 15)]
             vec![(17, 3), (17, 6), (8, 8), (39, 11), (17, 15)]
+        );
+    }
+
+    #[test]
+    fn k_gram_works() {
+        let text = "adorunrunrunadorunrun";
+        let k = 5;
+        assert_eq!(
+            k_gram(text, k),
+            vec![
+                7536710649711940037,
+                12375835004367686960,
+                13240722851591535538,
+                4020085029674966483,
+                4972485008023615292,
+                1468765096528618582,
+                4020085029674966483,
+                4972485008023615292,
+                2165872647979677269,
+                2880295526655702587,
+                9732345111308041966,
+                13607179090089924327,
+                7536710649711940037,
+                12375835004367686960,
+                13240722851591535538,
+                4020085029674966483
+            ]
         );
     }
 }
