@@ -4,3 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+ast-grep-core = "0.32.2"
+ast-grep-language = "0.32.2"
+
