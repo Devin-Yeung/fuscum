@@ -19,6 +19,7 @@ impl PyTree {
     pub fn apply_edits(&mut self, edits: Vec<Edit<String>>) -> &mut Self {
         edits
             .into_iter()
+            .rev()
             .fold(&mut self.ag, |root, edit| root.edit(edit).unwrap());
         self
     }

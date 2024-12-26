@@ -6,6 +6,8 @@ edition = "2021"
 [dependencies]
 ast-grep-core = "0.32.2"
 ast-grep-language = "0.32.2"
+clap = { version = "4.5.23", features = ["derive"] }
+walkdir = "2.5.0"
 
 [dev-dependencies]
 insta = "1.41.1"

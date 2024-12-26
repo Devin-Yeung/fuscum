@@ -1,12 +1,18 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
 
 pub fn k_gram(text: &str, k: usize) -> Vec<u64> {
+    let bytes = text.as_bytes();
     let mut hashes = Vec::new();
 
-    for i in 0..text.len().saturating_sub(k) {
-        let kgram = &text[i..i + k];
+    // Return empty vector if k is larger than text length
+    if k > bytes.len() {
+        return hashes;
+    }
+
+    // Use windows() to safely iterate over byte slices
+    for window in bytes.windows(k) {
         let mut hasher = DefaultHasher::new();
-        kgram.hash(&mut hasher);
+        window.hash(&mut hasher);
         hashes.push(hasher.finish());
     }
 
@@ -69,26 +75,6 @@ mod tests {
     fn k_gram_works() {
         let text = "adorunrunrunadorunrun";
         let k = 5;
-        assert_eq!(
-            k_gram(text, k),
-            vec![
-                7536710649711940037,
-                12375835004367686960,
-                13240722851591535538,
-                4020085029674966483,
-                4972485008023615292,
-                1468765096528618582,
-                4020085029674966483,
-                4972485008023615292,
-                2165872647979677269,
-                2880295526655702587,
-                9732345111308041966,
-                13607179090089924327,
-                7536710649711940037,
-                12375835004367686960,
-                13240722851591535538,
-                4020085029674966483
-            ]
-        );
+        insta::assert_debug_snapshot!(k_gram(text, k));
     }
 }
