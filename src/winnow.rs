@@ -1,4 +1,3 @@
-use std::hash::BuildHasher;
 use std::hash::{DefaultHasher, Hash, Hasher};
 
 pub fn k_gram(text: &str, k: usize) -> Vec<u64> {
