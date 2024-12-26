@@ -27,7 +27,7 @@ impl PyTree {
     pub fn subst_ident(&mut self, to: &str) -> &mut Self {
         let pat = Pattern::contextual("$V", "identifier", Python).expect("should parse");
         let edits = self.ag.root().replace_all(&pat, to);
-        self.apply_edits(edits)
+        self.apply_edits(edits) // TODO: bottleneck, it's too slow
     }
 
     pub fn source(&self) -> &str {
