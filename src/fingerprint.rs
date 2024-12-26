@@ -17,11 +17,12 @@ impl Default for FingerPrintConfig {
     fn default() -> Self {
         Self {
             k: 35,
-            window_size: 5,
+            window_size: 40,
         }
     }
 }
 
+#[derive(Eq, PartialEq)]
 pub struct FingerPrint {
     fingerprints: Vec<(u64, usize)>,
 }

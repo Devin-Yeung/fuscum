@@ -1,4 +1,5 @@
 use crate::preprocess::Preprocessor;
+use ast_grep_core::matcher::KindMatcher;
 use ast_grep_core::source::Edit;
 use ast_grep_core::{AstGrep, Language, Pattern, StrDoc};
 use ast_grep_language::Python;
@@ -24,8 +25,14 @@ impl PyTree {
         self
     }
 
+    pub fn remove_comments(&mut self) -> &mut Self {
+        let pat = KindMatcher::new("comment", Python);
+        let edits = self.ag.root().replace_all(&pat, "");
+        self.apply_edits(edits)
+    }
+
     pub fn subst_ident(&mut self, to: &str) -> &mut Self {
-        let pat = Pattern::contextual("$V", "identifier", Python).expect("should parse");
+        let pat = KindMatcher::new("identifier", Python);
         let edits = self.ag.root().replace_all(&pat, to);
         self.apply_edits(edits) // TODO: bottleneck, it's too slow
     }
@@ -38,7 +45,7 @@ impl PyTree {
 impl Preprocessor for PythonPreprocessor {
     fn preprocess<S: AsRef<str>>(&self, src: &S) -> Cow<str> {
         let mut tree = PyTree::new(src);
-        tree.subst_ident("v");
+        tree.subst_ident("v").remove_comments();
         // remove all the whitespace in the source code
         let src = tree
             .source()
