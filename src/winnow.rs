@@ -59,7 +59,7 @@ mod tests {
         ];
         let window_size = 4;
         assert_eq!(
-            super::winnowing(&hashes, window_size),
+            super::winnowing(hashes, window_size),
             // [(17, 3), (17, 6), (8, 8), (39, 11), (17, 15)]
             vec![(17, 3), (17, 6), (8, 8), (39, 11), (17, 15)]
         );
