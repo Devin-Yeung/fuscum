@@ -17,11 +17,30 @@ impl PyTree {
         }
     }
 
+    pub fn apply_edit_helper(&mut self, edits: Vec<Edit<String>>) -> String {
+        let mut new_content = String::new();
+
+        if edits.is_empty() {
+            return self.ag.source().to_string();
+        }
+
+        let old_content = self.ag.root().text();
+        let mut start = 0;
+        for diff in edits {
+            let range = diff.position..diff.position + diff.deleted_length;
+            new_content.push_str(&old_content[start..range.start]);
+            let replacement = String::from_utf8(diff.inserted_text).unwrap();
+            new_content.push_str(&replacement);
+            start = range.end;
+        }
+        // add trailing statements
+        new_content.push_str(&old_content[start..]);
+        new_content
+    }
+
     pub fn apply_edits(&mut self, edits: Vec<Edit<String>>) -> &mut Self {
-        edits
-            .into_iter()
-            .rev()
-            .fold(&mut self.ag, |root, edit| root.edit(edit).unwrap());
+        let new_content = self.apply_edit_helper(edits);
+        self.ag = Python.ast_grep(&new_content);
         self
     }
 
