@@ -1,7 +1,7 @@
 use crate::preprocess::Preprocessor;
 use ast_grep_core::matcher::KindMatcher;
 use ast_grep_core::source::Edit;
-use ast_grep_core::{AstGrep, Language, Pattern, StrDoc};
+use ast_grep_core::{AstGrep, Language, StrDoc};
 use ast_grep_language::Python;
 use std::borrow::Cow;
 
@@ -18,13 +18,9 @@ impl PyTree {
     }
 
     pub fn apply_edit_helper(&mut self, edits: Vec<Edit<String>>) -> String {
+        debug_assert_ne!(edits.len(), 0);
         let mut new_content = String::new();
-
-        if edits.is_empty() {
-            return self.ag.source().to_string();
-        }
-
-        let old_content = self.ag.root().text();
+        let old_content = self.ag.root().root().get_text();
         let mut start = 0;
         for diff in edits {
             let range = diff.position..diff.position + diff.deleted_length;
@@ -39,9 +35,14 @@ impl PyTree {
     }
 
     pub fn apply_edits(&mut self, edits: Vec<Edit<String>>) -> &mut Self {
-        let new_content = self.apply_edit_helper(edits);
-        self.ag = Python.ast_grep(&new_content);
-        self
+        match edits.len() {
+            0 => self,
+            _ => {
+                let new_content = self.apply_edit_helper(edits);
+                self.ag = Python.ast_grep(&new_content);
+                self
+            }
+        }
     }
 
     pub fn remove_comments(&mut self) -> &mut Self {
