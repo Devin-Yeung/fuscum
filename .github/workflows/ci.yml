@@ -9,6 +9,11 @@ concurrency:
   cancel-in-progress: true
 name: CI
 jobs:
+  cargo-deny:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: EmbarkStudios/cargo-deny-action@v1
   fmt:
     runs-on: ubuntu-latest
     name: stable / fmt
@@ -78,8 +83,8 @@ jobs:
       - name: cargo test --locked
         run: cargo test --locked --all-features --all-targets
       # https://github.com/rust-lang/cargo/issues/6669
-#      - name: cargo test --doc
-#        run: cargo test --locked --all-features --doc
+  #      - name: cargo test --doc
+  #        run: cargo test --locked --all-features --doc
   os-check:
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }} / stable / test
