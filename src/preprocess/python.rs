@@ -4,8 +4,35 @@ use ast_grep_core::source::Edit;
 use ast_grep_core::{AstGrep, Language, StrDoc};
 use ast_grep_language::Python;
 use std::borrow::Cow;
+use typed_builder::TypedBuilder;
 
-pub struct PythonPreprocessor;
+#[derive(TypedBuilder)]
+#[builder(doc, field_defaults(default, setter(into)))]
+pub struct PythonPreprocessor {
+    #[builder(setter(
+        strip_option,
+        doc = "Substitute variable to a certain unified representation"
+    ))]
+    subst_var: Option<String>,
+    #[builder(setter(
+        strip_option,
+        doc = "Substitute string to a certain unified representation"
+    ))]
+    subst_string: Option<String>,
+    #[builder(default = true, setter(doc = "Remove comments from the source code"))]
+    remove_comments: bool,
+}
+
+impl Default for PythonPreprocessor {
+    fn default() -> Self {
+        Self {
+            subst_var: Some("v".to_string()),
+            subst_string: Some("\"s\"".to_string()),
+            remove_comments: true,
+        }
+    }
+}
+
 pub struct PyTree {
     ag: AstGrep<StrDoc<Python>>,
 }
@@ -71,8 +98,18 @@ impl PyTree {
 impl Preprocessor for PythonPreprocessor {
     fn preprocess<S: AsRef<str>>(&self, src: &S) -> Cow<str> {
         let mut tree = PyTree::new(src);
-        tree.subst_ident("v").remove_comments();
-        tree.subst_string("\"s\"");
+
+        if self.remove_comments {
+            tree.remove_comments();
+        }
+
+        self.subst_var
+            .as_ref()
+            .map(|v| tree.subst_ident(v.as_str()));
+
+        self.subst_string
+            .as_ref()
+            .map(|v| tree.subst_string(v.as_str()));
         // remove all the whitespace in the source code
         let src = tree
             .source()
@@ -97,7 +134,11 @@ mod tests {
     #[test]
     fn preprocess() {
         let src = "def f(a, b, c):\n\ta = \"hello\"";
-        let pp = PythonPreprocessor.preprocess(&src);
-        assert_eq!(pp, "defv(v,v,v):v=\"s\"");
+        let pp = PythonPreprocessor::builder()
+            .subst_var("v")
+            .subst_string("\"s\"")
+            .remove_comments(true)
+            .build();
+        assert_eq!(pp.preprocess(&src), "defv(v,v,v):v=\"s\"");
     }
 }

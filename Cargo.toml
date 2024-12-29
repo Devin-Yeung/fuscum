@@ -8,6 +8,7 @@ ast-grep-core = "0.32.2"
 ast-grep-language = "0.32.2"
 clap = { version = "4.5.23", features = ["derive"] }
 rayon = "1.10.0"
+typed-builder = "0.20.0"
 walkdir = "2.5.0"
 
 [dev-dependencies]

@@ -64,7 +64,11 @@ mod tests {
     #[test]
     fn it_works() {
         let src = "def f(a, b, c):\n\ta = 1";
-        let fp = FingerPrint::new(src, PythonPreprocessor, FingerPrintConfig::new(3, 3));
+        let fp = FingerPrint::new(
+            src,
+            PythonPreprocessor::default(),
+            FingerPrintConfig::new(3, 3),
+        );
         insta::assert_debug_snapshot!(fp.fingerprints());
     }
 }
