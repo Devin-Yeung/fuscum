@@ -68,8 +68,8 @@ impl<L: Language + Copy> Tree<L> {
 
 #[cfg(test)]
 mod tests {
-    use ast_grep_language::Python;
     use super::*;
+    use ast_grep_language::Python;
 
     #[test]
     fn var_subst() {
