@@ -4,11 +4,12 @@ pub mod fingerprint;
 pub mod preprocess;
 pub mod winnow;
 
-use std::cmp::Ordering;
 use crate::doc::Doc;
 use crate::fingerprint::FingerPrint;
 use clap::Parser;
 use rayon::prelude::*;
+use std::cmp::Ordering;
+use std::collections::HashSet;
 use walkdir::WalkDir;
 
 fn main() {
@@ -63,6 +64,14 @@ fn main() {
 
     results
         .iter()
-        .filter(|r| r.score() > 0.6)
+        .filter(|r| r.score() > args.threshold)
         .for_each(|r| println!("{r:?}"));
+
+    let all = results
+        .iter()
+        .filter(|r| r.score() > args.threshold)
+        .map(|r| r.base().to_owned())
+        .collect::<HashSet<_>>();
+
+    println!("all({}): {:?}", all.len(), all);
 }
