@@ -1,4 +1,5 @@
 use crate::fingerprint::FingerPrint;
+use std::cmp::Ordering;
 
 #[derive(Eq, PartialEq)]
 pub struct Doc {
@@ -6,11 +7,31 @@ pub struct Doc {
     pub(crate) finger_print: FingerPrint,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Similarity {
     base: String,
     against: String,
-    pub(crate) score: f32,
+    score: f32,
+}
+
+impl PartialOrd for Similarity {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.score.partial_cmp(&other.score)
+    }
+}
+
+impl Similarity {
+    pub fn score(&self) -> f32 {
+        self.score
+    }
+
+    pub fn base(&self) -> &str {
+        &self.base
+    }
+
+    pub fn against(&self) -> &str {
+        &self.against
+    }
 }
 
 impl Doc {

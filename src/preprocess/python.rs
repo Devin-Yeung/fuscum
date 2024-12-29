@@ -57,6 +57,12 @@ impl PyTree {
         self.apply_edits(edits) // TODO: bottleneck, it's too slow
     }
 
+    pub fn subst_string(&mut self, to: &str) -> &mut Self {
+        let pat = KindMatcher::new("string", Python);
+        let edits = self.ag.root().replace_all(&pat, to);
+        self.apply_edits(edits)
+    }
+
     pub fn source(&self) -> &str {
         self.ag.source()
     }
@@ -66,6 +72,7 @@ impl Preprocessor for PythonPreprocessor {
     fn preprocess<S: AsRef<str>>(&self, src: &S) -> Cow<str> {
         let mut tree = PyTree::new(src);
         tree.subst_ident("v").remove_comments();
+        tree.subst_string("\"s\"");
         // remove all the whitespace in the source code
         let src = tree
             .source()
@@ -89,8 +96,8 @@ mod tests {
 
     #[test]
     fn preprocess() {
-        let src = "def f(a, b, c):\n\ta = 1";
+        let src = "def f(a, b, c):\n\ta = \"hello\"";
         let pp = PythonPreprocessor.preprocess(&src);
-        assert_eq!(pp, "defv(v,v,v):v=1");
+        assert_eq!(pp, "defv(v,v,v):v=\"s\"");
     }
 }
