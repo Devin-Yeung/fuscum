@@ -4,6 +4,7 @@ pub mod fingerprint;
 pub mod preprocess;
 pub mod winnow;
 
+use std::cmp::Ordering;
 use crate::doc::Doc;
 use crate::fingerprint::FingerPrint;
 use clap::Parser;
@@ -58,10 +59,10 @@ fn main() {
         .filter(|x| x.is_some())
         .flat_map(|x| x.unwrap())
         .collect::<Vec<_>>();
-    results.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap());
+    results.sort_by(|a, b| b.partial_cmp(&a).unwrap_or(Ordering::Equal));
 
     results
         .iter()
-        .filter(|r| r.score > 0.6)
+        .filter(|r| r.score() > 0.6)
         .for_each(|r| println!("{r:?}"));
 }
