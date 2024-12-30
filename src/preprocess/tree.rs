@@ -45,7 +45,12 @@ impl<L: Language + Copy> Tree<L> {
 
     pub fn remove_comments<S: AsRef<str>>(&mut self, kind: S) -> &mut Self {
         let pat = KindMatcher::new(kind.as_ref(), self.lang);
-        let edits = self.ag.root().replace_all(&pat, "");
+        let edits = self
+            .ag
+            .root()
+            .find_all(&pat)
+            .map(|m| m.remove())
+            .collect::<Vec<_>>();
         self.apply_edits(edits)
     }
 

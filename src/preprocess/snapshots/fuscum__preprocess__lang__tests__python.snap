@@ -1,0 +1,10 @@
+---
+source: src/preprocess/lang.rs
+expression: "&format!(\"{src}\\n\\n\\n{res}\")"
+snapshot_kind: text
+---
+def foo(a, b, c): # this is comment
+    print("Hello World")
+
+
+defv(v,v,v):v("s")

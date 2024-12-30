@@ -59,7 +59,7 @@ impl FingerPrint {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::preprocess::python::PythonPreprocessor;
+    use crate::preprocess::PythonPreprocessor;
 
     #[test]
     fn it_works() {

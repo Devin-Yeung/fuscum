@@ -29,7 +29,7 @@ fn main() {
             println!("processing: {}", path.display());
             let finger_print = FingerPrint::new(
                 f,
-                preprocess::python::PythonPreprocessor::default(),
+                preprocess::PythonPreprocessor::default(),
                 fingerprint::FingerPrintConfig::default(),
             );
             Doc {
