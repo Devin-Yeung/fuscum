@@ -7,6 +7,15 @@ pub struct Doc {
     pub(crate) finger_print: FingerPrint,
 }
 
+impl Doc {
+    pub fn new (name: String, finger_print: FingerPrint) -> Self {
+        Self {
+            name,
+            finger_print,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct Similarity {
     base: String,

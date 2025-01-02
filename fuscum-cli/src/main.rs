@@ -1,11 +1,6 @@
-pub mod arg;
-mod doc;
-pub mod fingerprint;
-pub mod preprocess;
-pub mod winnow;
+use fuscum::{doc::Doc, fingerprint, fingerprint::FingerPrint, preprocess};
 
-use crate::doc::Doc;
-use crate::fingerprint::FingerPrint;
+mod arg;
 use clap::Parser;
 use rayon::prelude::*;
 use std::cmp::Ordering;
@@ -32,10 +27,10 @@ fn main() {
                 preprocess::PythonPreprocessor::default(),
                 fingerprint::FingerPrintConfig::default(),
             );
-            Doc {
-                name: path.file_name().unwrap().to_str().unwrap().to_string(),
+            Doc::new(
+                path.file_name().unwrap().to_str().unwrap().to_string(),
                 finger_print,
-            }
+            )
         })
         .collect::<Vec<_>>();
 

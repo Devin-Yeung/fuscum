@@ -1,0 +1,10 @@
+[package]
+name = "fuscum-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fuscum = { path = ".." }
+rayon = "1.10.0"
+walkdir = "2.5.0"
+clap = { version = "4.5.23", features = ["derive"] }
