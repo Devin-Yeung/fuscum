@@ -24,7 +24,7 @@ impl Default for FingerPrintConfig {
 
 #[derive(Eq, PartialEq)]
 pub struct FingerPrint {
-    fingerprints: Vec<(u64, usize)>,
+    pub(crate) fingerprints: Vec<(u64, usize)>,
 }
 
 impl FingerPrint {
@@ -47,7 +47,7 @@ impl FingerPrint {
         intersection / cur.len() as f32
     }
 
-    fn hashes(&self) -> HashSet<u64> {
+    pub fn hashes(&self) -> HashSet<u64> {
         self.fingerprints.iter().map(|(hash, _)| *hash).collect()
     }
 
