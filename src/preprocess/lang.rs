@@ -39,7 +39,7 @@ macro_rules! impl_lang_preprocessor {
         }
 
         impl Preprocessor for $name {
-            fn preprocess<S: AsRef<str>>(&self, src: &S) -> Cow<str> {
+            fn preprocess(&self, src: &str) -> Cow<str> {
                 let mut tree = Tree::new(src, $lang);
 
                 if self.remove_comments {

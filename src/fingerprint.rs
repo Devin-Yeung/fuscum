@@ -33,7 +33,7 @@ impl FingerPrint {
         P: Preprocessor,
         S: AsRef<str>,
     {
-        let src = pp.preprocess(&src);
+        let src = pp.preprocess(src.as_ref());
         let hashes = k_gram(&src, config.k);
         let fingerprints = winnowing(&hashes, config.window_size);
         Self { fingerprints }
