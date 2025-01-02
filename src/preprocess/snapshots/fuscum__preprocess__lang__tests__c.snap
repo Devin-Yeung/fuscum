@@ -1,0 +1,14 @@
+---
+source: src/preprocess/lang.rs
+expression: "&format!(\"{src}\\n\\n\\n{res}\")"
+snapshot_kind: text
+---
+#include <stdio.h>
+
+int main() {
+    printf("%s", "Hello, World!");
+    return 0;
+}
+
+
+#include<stdio.h>intv(){v("s","s");return0;}

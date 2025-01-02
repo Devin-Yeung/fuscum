@@ -1,3 +1,8 @@
+use crate::preprocess::tree::Tree;
+use crate::preprocess::Preprocessor;
+use std::borrow::Cow;
+use typed_builder::TypedBuilder;
+
 macro_rules! impl_lang_preprocessor {
     (
         $name:ident,
@@ -6,11 +11,6 @@ macro_rules! impl_lang_preprocessor {
         string => $string_token:expr,
         comment => $comment_token:expr
     ) => {
-        use crate::preprocess::tree::Tree;
-        use crate::preprocess::Preprocessor;
-        use std::borrow::Cow;
-        use typed_builder::TypedBuilder;
-
         #[derive(TypedBuilder)]
         #[builder(doc, field_defaults(default, setter(into)))]
         pub struct $name {
@@ -73,6 +73,14 @@ impl_lang_preprocessor!(
     comment => "comment"
 );
 
+impl_lang_preprocessor!(
+    CPreprocessor,
+    lang => ast_grep_language::C,
+    ident => "identifier",
+    string => "string_literal",
+    comment => "comment"
+);
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -81,6 +89,14 @@ mod tests {
     fn python() {
         let src = include_str!("../../fixtures/langs/python.py");
         let pp = PythonPreprocessor::default();
+        let res = pp.preprocess(&src);
+        insta::assert_snapshot!(&format!("{src}\n\n\n{res}"))
+    }
+
+    #[test]
+    fn c() {
+        let src = include_str!("../../fixtures/langs/c.c");
+        let pp = CPreprocessor::default();
         let res = pp.preprocess(&src);
         insta::assert_snapshot!(&format!("{src}\n\n\n{res}"))
     }
