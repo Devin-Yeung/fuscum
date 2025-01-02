@@ -1,72 +1,68 @@
-use fuscum::{doc::Doc, fingerprint, fingerprint::FingerPrint, preprocess};
-
 mod arg;
+mod submission;
+mod summary;
+
+use crate::submission::Submission;
+use crate::summary::{SourceSummary, Summary};
 use clap::Parser;
-use rayon::prelude::*;
+use fuscum::doc::MultiDoc;
+use glob::glob;
 use std::cmp::Ordering;
-use std::collections::HashSet;
-use walkdir::WalkDir;
+// use rayon::prelude::*;
+// use std::io::Read;
 
 fn main() {
     let args = arg::Args::parse();
 
-    let entries = WalkDir::new(&args.dir)
-        .into_iter()
-        .filter_map(|e| e.ok())
-        .filter(|e| e.file_type().is_file())
-        .collect::<Vec<_>>();
-
-    let docs = entries
-        .par_iter()
-        .map(|entry| {
-            let path = entry.path();
-            let f = std::fs::read_to_string(path).expect("should read file");
-            println!("processing: {}", path.display());
-            let finger_print = FingerPrint::new(
-                f,
-                preprocess::PythonPreprocessor::default(),
-                fingerprint::FingerPrintConfig::default(),
-            );
-            Doc::new(
-                path.file_name().unwrap().to_str().unwrap().to_string(),
-                finger_print,
-            )
+    let docs = glob(&args.pat)
+        .expect("Failed to read glob pattern")
+        .filter_map(|glob| {
+            glob.ok().map(|path| {
+                let doc: MultiDoc = Submission::new(path).unwrap().into();
+                doc
+            })
         })
         .collect::<Vec<_>>();
 
-    // compare against all the pair
     let mut results = docs
         .iter()
         .enumerate()
-        .map(|(i, doc)| {
-            docs.iter()
+        .map(|(i, base)| {
+            let mut sims = docs
+                .iter()
                 .enumerate()
-                .map(|(j, other)| {
-                    if i != j {
-                        let similarity = doc.similarity(other);
-                        Some(similarity)
-                    } else {
-                        None
-                    }
+                .filter_map(|(j, against)| match i.cmp(&j) {
+                    Ordering::Equal => None,
+                    _ => Some(base.similarity(against)),
                 })
-                .filter(|x| x.is_some())
-                .collect::<Option<Vec<_>>>()
+                .collect::<Vec<_>>();
+            // take top 3 similar docs
+            sims.sort_by(|a, b| b.score().total_cmp(&a.score()));
+            let against: Vec<_> = sims.into_iter().take(3).map(|s| s.into()).collect();
+            Summary {
+                base: base.name().to_string(),
+                max_score: against
+                    .iter()
+                    .map(|s: &SourceSummary| s.score)
+                    .reduce(f32::max)
+                    .unwrap(),
+                against,
+            }
         })
-        .filter(|x| x.is_some())
-        .flat_map(|x| x.unwrap())
         .collect::<Vec<_>>();
-    results.sort_by(|a, b| b.partial_cmp(&a).unwrap_or(Ordering::Equal));
 
-    results
-        .iter()
-        .filter(|r| r.score() > args.threshold)
-        .for_each(|r| println!("{r:?}"));
+    results.sort_by(|a, b| b.score().total_cmp(&a.score()));
+    let results = results
+        .into_iter()
+        .filter(|r| r.max_score > args.threshold)
+        .collect::<Vec<_>>();
 
-    let all = results
-        .iter()
-        .filter(|r| r.score() > args.threshold)
-        .map(|r| r.base().to_owned())
-        .collect::<HashSet<_>>();
+    for result in &results {
+        println!("{}: {}", result.base, result.score());
+    }
 
-    println!("all({}): {:?}", all.len(), all);
+    println!("{} in total", results.len());
+    // write to a json file
+    let json = serde_json::to_string_pretty(&results).expect("should serialize to json");
+    std::fs::write("results.json", json).expect("should write to file");
 }
