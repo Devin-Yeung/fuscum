@@ -1,6 +1,7 @@
 use crate::fingerprint::FingerPrint;
-use std::cmp::Ordering;
+use std::cmp::{min, Ordering};
 use std::collections::HashSet;
+use std::fmt::Debug;
 
 pub trait Similar {
     type Hash: std::hash::Hash + Eq;
@@ -80,6 +81,18 @@ pub struct MultiDoc {
     docs: Vec<Doc>,
 }
 
+impl Debug for MultiDoc {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MultiDoc")
+            .field("name", &self.name)
+            .field(
+                "docs",
+                &self.docs.iter().map(|d| &d.name).collect::<Vec<_>>(),
+            )
+            .finish()
+    }
+}
+
 impl Similar for MultiDoc {
     type Hash = u64;
 
@@ -95,12 +108,34 @@ pub struct MultiDocSimilarity {
     sources: Vec<(String, f32)>,
 }
 
+impl MultiDocSimilarity {
+    pub fn base(&self) -> &str {
+        &self.base
+    }
+
+    pub fn against(&self) -> &str {
+        &self.against
+    }
+
+    pub fn score(&self) -> f32 {
+        self.score
+    }
+
+    pub fn top_n_sources(&self, n: usize) -> &[(String, f32)] {
+        &self.sources[..min(n, self.sources.len())]
+    }
+}
+
 impl MultiDoc {
     pub fn new<S: AsRef<str>>(name: S) -> Self {
         Self {
             name: name.as_ref().to_string(),
             docs: Vec::new(),
         }
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
     pub fn add_doc(&mut self, doc: Doc) {
@@ -121,7 +156,7 @@ impl MultiDoc {
     }
 
     pub fn similarity(&self, other: &Self) -> MultiDocSimilarity {
-        let sources: Vec<_> = other
+        let mut sources: Vec<_> = other
             .docs
             .iter()
             .map(|against| {
@@ -129,6 +164,8 @@ impl MultiDoc {
                 (against.name.clone(), score)
             })
             .collect();
+
+        sources.sort_by(|a, b| b.1.total_cmp(&a.1));
 
         let score = Similar::similarity(self, other);
 
