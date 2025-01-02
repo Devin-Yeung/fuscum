@@ -7,29 +7,27 @@ use crate::summary::{SourceSummary, Summary};
 use clap::Parser;
 use fuscum::doc::MultiDoc;
 use glob::glob;
+use rayon::prelude::*;
 use std::cmp::Ordering;
-// use rayon::prelude::*;
-// use std::io::Read;
 
 fn main() {
     let args = arg::Args::parse();
 
     let docs = glob(&args.pat)
         .expect("Failed to read glob pattern")
-        .filter_map(|glob| {
-            glob.ok().map(|path| {
-                let doc: MultiDoc = Submission::new(path).unwrap().into();
-                doc
-            })
-        })
-        .collect::<Vec<_>>();
+        .filter_map(|glob| glob.ok())
+        .collect::<Vec<_>>()
+        .par_iter()
+        .map(|path| Submission::new(path).ok())
+        .filter_map(|submission| submission.map(Submission::into))
+        .collect::<Vec<MultiDoc>>();
 
     let mut results = docs
-        .iter()
+        .par_iter()
         .enumerate()
         .map(|(i, base)| {
             let mut sims = docs
-                .iter()
+                .par_iter()
                 .enumerate()
                 .filter_map(|(j, against)| match i.cmp(&j) {
                     Ordering::Equal => None,
