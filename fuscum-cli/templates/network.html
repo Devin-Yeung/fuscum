@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Plagiarism Network</title>
+    <script
+            type="text/javascript"
+            src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
+    ></script>
+    <style>
+        #plagiarism-network {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body style="margin: 0">
+<div id="plagiarism-network"></div>
+<script>
+    const jsonData = {{data|json|safe}}
+    // Process data
+    const nodes = new Set();
+    const edges = [];
+
+    jsonData.forEach(item => {
+        nodes.add(item.base);
+        item.against.forEach(against => {
+            if (against.score > {{ threshold }}) {
+                nodes.add(against.against);
+                edges.push({
+                    from: item.base,
+                    to: against.against,
+                    value: against.score * 5
+                });
+            }
+        });
+    });
+
+    const data = {
+        nodes: Array.from(nodes).map(id => ({id, label: id})),
+        edges: edges
+    };
+
+    const options = {
+        nodes: {
+            shape: 'dot',
+            size: 12,
+            font: {
+                size: 32
+            }
+        },
+        edges: {
+            smooth: {
+                type: 'continuous'
+            }
+        },
+        physics: {
+            stabilization: false,
+            barnesHut: {
+                gravitationalConstant: -80000,
+                springConstant: 0.001,
+                springLength: 200
+            }
+        }
+    };
+
+    const container = document.getElementById('plagiarism-network');
+    const network = new vis.Network(container, data, options);
+</script>
+</body>
+</html>

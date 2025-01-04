@@ -15,3 +15,4 @@ glob = "0.3.2"
 serde = { version = "1.0.216", features = ["derive"] }
 serde_json = "1.0.134"
 anyhow = "1.0.95"
+rinja = { version = "0.3.5", features = ["serde_json"] }
