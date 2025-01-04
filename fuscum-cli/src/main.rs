@@ -5,13 +5,13 @@ mod visual;
 
 use crate::submission::Submission;
 use crate::summary::{SourceSummary, Summary};
+use crate::visual::NetworkTemplate;
 use clap::Parser;
 use fuscum::doc::MultiDoc;
 use glob::glob;
 use rayon::prelude::*;
-use std::cmp::Ordering;
-use crate::visual::NetworkTemplate;
 use rinja::Template;
+use std::cmp::Ordering;
 
 fn main() {
     let args = arg::Args::parse();
@@ -65,7 +65,9 @@ fn main() {
     println!("{} in total", results.len());
     // write to a json file and render the network visualization
     let json = serde_json::to_string_pretty(&results).expect("should serialize to json");
-    let vis = NetworkTemplate::new(&results, args.threshold).render().expect("should render network template");
+    let vis = NetworkTemplate::new(&results, args.threshold)
+        .render()
+        .expect("should render network template");
     std::fs::write("results.json", json).expect("should write to file");
     std::fs::write("network.html", vis).expect("should write to file");
 }

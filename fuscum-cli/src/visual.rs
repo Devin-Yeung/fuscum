@@ -1,5 +1,5 @@
-use rinja::Template;
 use crate::summary::Summary;
+use rinja::Template;
 
 #[derive(Template)]
 #[template(path = "network.html")]
