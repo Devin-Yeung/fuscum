@@ -12,13 +12,13 @@ jobs:
   cargo-deny:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: EmbarkStudios/cargo-deny-action@v2
   fmt:
     runs-on: ubuntu-latest
     name: stable / fmt
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
       - name: Install stable
@@ -38,7 +38,7 @@ jobs:
       matrix:
         toolchain: [ stable ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
       - name: Install ${{ matrix.toolchain }}
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     name: nightly / doc
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
       - name: Install nightly
@@ -70,7 +70,7 @@ jobs:
       matrix:
         toolchain: [ stable ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
       - name: Install ${{ matrix.toolchain }}
@@ -93,7 +93,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest, macos-latest, macos-14, windows-latest ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
       - name: Install stable
@@ -107,7 +107,7 @@ jobs:
     runs-on: ubuntu-latest
     name: ubuntu / stable / coverage
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
       - name: Install stable
@@ -131,7 +131,7 @@ jobs:
 #    name: Spell Check
 #    runs-on: ubuntu-latest
 #    steps:
-#      - uses: actions/checkout@v4
+#      - uses: actions/checkout@v5
 #      - uses: crate-ci/typos@master
 #        with:
 #          files: .
