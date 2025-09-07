@@ -1,44 +1,29 @@
 {
-  description = "Fuscum built with Nix";
+  description = "Building static binaries with musl";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    crane.url = "github:ipetkov/crane";
     flake-utils.url = "github:numtide/flake-utils";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = nixpkgs.legacyPackages.${system};
-      in {
-        # Define the package
-        packages = rec {
-          default = fuscum-cli;
-
-          fuscum-cli = pkgs.rustPlatform.buildRustPackage {
-            pname = "fuscum-cli";
-
-            version = "0.1.0";
-            src = ./.;
-
-            cargoLock = {
-              lockFile = ./Cargo.lock; # why i dont need to provide a hash???
-            };
-
-          };
-        };
-
-        # Optionally add a development shell
-        devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [ cargo rustc rust-analyzer ];
-        };
-
-        # Add apps so the binary can be run with `nix run`
-        apps = rec {
-          default = fuscum-cli;
-          fuscum-cli = flake-utils.lib.mkApp {
-            drv = self.packages.${system}.fuscum-cli;
-            name = "fuscum-cli";
-          };
-        };
-      });
+  outputs =
+    inputs@{ flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
+      imports = [
+        ./flakes/build.nix
+        ./flakes/build-static.nix
+      ];
+    };
 }

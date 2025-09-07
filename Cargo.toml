@@ -9,3 +9,6 @@ resolver = "2"
 
 [workspace.dependencies]
 fuscum = { path = "crates/fuscum" }
+
+[workspace.metadata.crane]
+name = "fuscum"
