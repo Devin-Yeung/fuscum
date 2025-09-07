@@ -4,11 +4,8 @@ edition = "2021"
 license = "(MIT OR Apache-2.0) AND Unicode-3.0"
 
 [workspace]
-members = [
-    "fuscum",
-    "fuscum-cli",
-]
+members = ["crates/*"]
 resolver = "2"
 
 [workspace.dependencies]
-fuscum = { path = "fuscum" }
+fuscum = { path = "crates/fuscum" }

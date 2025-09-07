@@ -87,7 +87,7 @@ mod tests {
 
     #[test]
     fn python() {
-        let src = include_str!("../../../fixtures/langs/python.py");
+        let src = include_str!("../../../../fixtures/langs/python.py");
         let pp = PythonPreprocessor::default();
         let res = pp.preprocess(&src);
         insta::assert_snapshot!(&format!("{src}\n\n\n{res}"))
@@ -95,7 +95,7 @@ mod tests {
 
     #[test]
     fn c() {
-        let src = include_str!("../../../fixtures/langs/c.c");
+        let src = include_str!("../../../../fixtures/langs/c.c");
         let pp = CPreprocessor::default();
         let res = pp.preprocess(&src);
         insta::assert_snapshot!(&format!("{src}\n\n\n{res}"))
