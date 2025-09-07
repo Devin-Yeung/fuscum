@@ -77,7 +77,7 @@ jobs:
           # do purge caches
           purge: true
           # purge all versions of the cache
-          purge-prefixes: cache-${{ matrix.os }}-
+          purge-prefixes: nix-${{ matrix.os }}-
           # created more than this number of seconds ago relative to the start of the `Post Restore` phase
           purge-created: 0
           # except the version with the `primary-key`, if it exists
@@ -111,14 +111,14 @@ jobs:
           # restore and save a cache using this key
           primary-key: nix-static-${{ matrix.target }}-${{ hashFiles('**/*.nix', 'Cargo.lock') }}
           # if there's no cache hit, restore a cache by this prefix
-          restore-prefixes-first-match: nix-static-${{ matrix.target }}
+          restore-prefixes-first-match: nix-static-${{ matrix.target }}-
           # collect garbage until Nix store size (in bytes) is at most this number
           # before trying to save a new cache
           gc-max-store-size-linux: 1073741824
           # do purge caches
           purge: true
           # purge all versions of the cache
-          purge-prefixes: cache-${{ matrix.os }}-
+          purge-prefixes: nix-static-${{ matrix.target }}-
           # created more than this number of seconds ago relative to the start of the `Post Restore` phase
           purge-created: 0
           # except the version with the `primary-key`, if it exists
