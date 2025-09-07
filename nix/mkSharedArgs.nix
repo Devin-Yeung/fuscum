@@ -5,7 +5,20 @@
 let
   inherit (pkgs) lib;
 
-  src = craneLib.cleanCargoSource ../.;
+  unfilteredRoot = ../.; # The original, unfiltered source
+  src = lib.fileset.toSource {
+    root = unfilteredRoot;
+    fileset = lib.fileset.unions [
+      # Default files from crane (Rust and cargo files)
+      (craneLib.fileset.commonCargoSources unfilteredRoot)
+      # Also keep any snapshots files
+      (lib.fileset.fileFilter (file: file.hasExt "snap") unfilteredRoot)
+      # Keep any HTML templates
+      (lib.fileset.fileFilter (file: file.hasExt "html") unfilteredRoot)
+      # Example of a folder for images, icons, etc
+      (lib.fileset.maybeMissing ../fixtures)
+    ];
+  };
 
   commonArgs = {
     inherit src;
@@ -13,7 +26,7 @@ let
     buildInputs = [
       # Add extra build inputs if needed
     ]
-    ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
+    ++ lib.optionals pkgs.stdenv.isDarwin [
       pkgs.libiconv
     ];
   };
