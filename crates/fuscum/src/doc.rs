@@ -146,8 +146,7 @@ impl MultiDoc {
     pub fn hashes(&self) -> HashSet<u64> {
         self.docs
             .iter()
-            .map(|doc| doc.finger_print.hashes())
-            .flatten()
+            .flat_map(|doc| doc.finger_print.hashes())
             .collect()
     }
 

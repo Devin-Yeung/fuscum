@@ -87,7 +87,6 @@ jobs:
         run: nix build .#fuscum-cli
 
   build-static-binary:
-    name: Build Static Binary (${{ matrix.target }})
     strategy:
       fail-fast: false
       matrix:
