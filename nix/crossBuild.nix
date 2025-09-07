@@ -6,7 +6,7 @@
   target,
 }:
 let
-  inherit (import ./.) mkCrossCraneLib mkFormula mkCrossPkgs;
+  inherit (import ./.) mkCrossCraneLib mkCrossPkgs;
 
   pkgs = mkCrossPkgs {
     inherit
@@ -22,18 +22,16 @@ let
     inherit pkgs target;
   };
 
-  formula = mkFormula {
+  inherit (import ../nix) mkFuscumCli;
+
+  # Common arguments for building
+  formula = mkFuscumCli {
     inherit pkgs craneLib;
   };
-  inherit (formula) individualCrateArgs fileSetForCrate;
+
 in
 craneLib.buildPackage (
-  individualCrateArgs
-  // {
-    pname = "fuscum-cli";
-    cargoExtraArgs = "-p fuscum-cli";
-    src = fileSetForCrate ../crates/fuscum-cli;
-  }
+  formula
   // {
     CARGO_BUILD_TARGET = target;
     CARGO_BUILD_RUSTFLAGS = "-C target-feature=+crt-static";

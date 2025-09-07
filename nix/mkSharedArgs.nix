@@ -24,25 +24,11 @@ let
     inherit cargoArtifacts;
     inherit (craneLib.crateNameFromCargoToml { inherit src; }) version;
   };
-
-  fileSetForCrate =
-    crate:
-    lib.fileset.toSource {
-      root = ../.;
-      fileset = lib.fileset.unions [
-        ../Cargo.toml
-        ../Cargo.lock
-        (craneLib.fileset.commonCargoSources ../crates/fuscum)
-        (craneLib.fileset.commonCargoSources crate)
-        (lib.fileset.fileFilter (file: file.hasExt "html") crate)
-      ];
-    };
 in
 {
   inherit
     commonArgs
     cargoArtifacts
     individualCrateArgs
-    fileSetForCrate
     ;
 }

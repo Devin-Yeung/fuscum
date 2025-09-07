@@ -7,24 +7,16 @@
       ...
     }:
     let
-      inherit (import ../nix) mkFormula;
+      inherit (import ../nix) mkFuscumCli;
 
       craneLib = inputs.crane.mkLib pkgs;
 
       # Common arguments for building
-      formula = mkFormula {
+      formula = mkFuscumCli {
         inherit pkgs craneLib;
       };
 
-      inherit (formula) individualCrateArgs fileSetForCrate;
-      fuscum-cli = craneLib.buildPackage (
-        individualCrateArgs
-        // {
-          pname = "fuscum-cli";
-          cargoExtraArgs = "-p fuscum-cli";
-          src = fileSetForCrate ../crates/fuscum-cli;
-        }
-      );
+      fuscum-cli = craneLib.buildPackage formula;
     in
     {
       packages.fuscum-cli = fuscum-cli;
