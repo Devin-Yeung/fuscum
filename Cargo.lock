@@ -105,12 +105,24 @@ dependencies = [
 ]
 
 [[package]]
-name = "ast-grep-language"
-version = "0.32.3"
+name = "ast-grep-core"
+version = "0.36.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "512cbfcfb59ef8f7d7de5d42b96b9312f0e6b4f06d3d43a58e3d6c21670c2146"
+checksum = "538f2e4c9e991d0891eec0e68db3cbd5ed0d9b91c1dba1bd1ebf538b58793514"
 dependencies = [
- "ast-grep-core",
+ "bit-set",
+ "regex",
+ "thiserror 2.0.9",
+ "tree-sitter-facade-sg",
+]
+
+[[package]]
+name = "ast-grep-language"
+version = "0.36.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "32f784b34c751a9e16b2bc0a610b56df3c3316136c45782f62ec61cc856f2d16"
+dependencies = [
+ "ast-grep-core 0.36.3",
  "ignore",
  "serde",
  "tree-sitter-bash",
@@ -132,7 +144,6 @@ dependencies = [
  "tree-sitter-ruby",
  "tree-sitter-rust",
  "tree-sitter-scala",
- "tree-sitter-sequel",
  "tree-sitter-swift",
  "tree-sitter-typescript",
  "tree-sitter-yaml",
@@ -475,7 +486,7 @@ dependencies = [
 name = "fuscum"
 version = "0.1.0"
 dependencies = [
- "ast-grep-core",
+ "ast-grep-core 0.32.3",
  "ast-grep-language",
  "insta",
  "typed-builder",
@@ -1186,9 +1197,9 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-css"
-version = "0.23.1"
+version = "0.23.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "25435a275adb3226b6fddab891bbc50d1a500774a44ceb97022a39666ccda75d"
+checksum = "5ad6489794d41350d12a7fbe520e5199f688618f43aace5443980d1ddcf1b29e"
 dependencies = [
  "cc",
  "tree-sitter-language",
@@ -1355,20 +1366,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "tree-sitter-sequel"
-version = "0.3.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23b40eae724945161b8a26347740a8db4ad815ee98c8c2d99a122db9dd763f1f"
-dependencies = [
- "cc",
- "tree-sitter-language",
-]
-
-[[package]]
 name = "tree-sitter-swift"
-version = "0.6.0"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d65aeb41726119416567d0333ec17580ac4abfb96db1f67c4bd638c65f9992fe"
+checksum = "4ef216011c3e3df4fa864736f347cb8d509b1066cf0c8549fb1fd81ac9832e59"
 dependencies = [
  "cc",
  "tree-sitter-language",
