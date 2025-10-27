@@ -9,7 +9,7 @@ fuscum = { path = "../fuscum" }
 rayon = "1.10.0"
 walkdir = "2.5.0"
 clap = { version = "4.5.23", features = ["derive"] }
-zip-extract = "0.2.1"
+zip-extract = "0.4.1"
 tempfile = "3.14.0"
 glob = "0.3.2"
 serde = { version = "1.0.216", features = ["derive"] }

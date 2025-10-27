@@ -8,7 +8,7 @@
 
 {
   # https://devenv.sh/packages/
-  packages = [ pkgs.git ];
+  packages = with pkgs; [ cargo-deny ];
 
   # https://devenv.sh/languages/
   languages.rust.enable = true;
