@@ -5,7 +5,7 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
-ast-grep-core = "0.32.2"
+ast-grep-core = "0.36.3"
 ast-grep-language = "0.32.2"
 typed-builder = "0.23.0"
 

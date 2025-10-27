@@ -105,12 +105,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "ast-grep-core"
+version = "0.36.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "538f2e4c9e991d0891eec0e68db3cbd5ed0d9b91c1dba1bd1ebf538b58793514"
+dependencies = [
+ "bit-set",
+ "regex",
+ "thiserror 2.0.9",
+ "tree-sitter-facade-sg",
+]
+
+[[package]]
 name = "ast-grep-language"
 version = "0.32.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "512cbfcfb59ef8f7d7de5d42b96b9312f0e6b4f06d3d43a58e3d6c21670c2146"
 dependencies = [
- "ast-grep-core",
+ "ast-grep-core 0.32.3",
  "ignore",
  "serde",
  "tree-sitter-bash",
@@ -475,7 +487,7 @@ dependencies = [
 name = "fuscum"
 version = "0.1.0"
 dependencies = [
- "ast-grep-core",
+ "ast-grep-core 0.36.3",
  "ast-grep-language",
  "insta",
  "typed-builder",
