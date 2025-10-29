@@ -1,13 +1,15 @@
 use ast_grep_core::matcher::KindMatcher;
 use ast_grep_core::source::Edit;
-use ast_grep_core::{AstGrep, Language, StrDoc};
+use ast_grep_core::tree_sitter::StrDoc;
+use ast_grep_core::{AstGrep, Language};
+use ast_grep_language::LanguageExt;
 
-pub struct Tree<L: Language> {
+pub struct Tree<L: Language + LanguageExt> {
     lang: L,
     ag: AstGrep<StrDoc<L>>,
 }
 
-impl<L: Language + Copy> Tree<L> {
+impl<L: Language + Copy + LanguageExt> Tree<L> {
     pub fn new<S: AsRef<str>>(src: S, lang: L) -> Self {
         Self {
             ag: lang.ast_grep(src.as_ref()),
