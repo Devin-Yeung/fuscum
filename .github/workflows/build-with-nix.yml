@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout tree
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install Nix
         uses: DeterminateSystems/determinate-nix-action@main
@@ -59,7 +59,7 @@ jobs:
 
     steps:
       - name: Checkout tree
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install Nix
         uses: DeterminateSystems/determinate-nix-action@main
@@ -99,7 +99,7 @@ jobs:
 
     steps:
       - name: Checkout tree
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install Nix
         uses: DeterminateSystems/determinate-nix-action@main
