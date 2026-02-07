@@ -1,0 +1,28 @@
+---
+source: crates/fuscum/src/preprocess/lang.rs
+expression: "&format!(\"{src}\\n\\n\\n{res}\")"
+snapshot_kind: text
+---
+// This is a Go comment
+package main
+
+import "fmt"
+
+type Person struct {
+	Name string
+	Age  int
+}
+
+func greet(name string) string {
+	message := "Hello, " + name
+	return message
+}
+
+func main() {
+	userName := "World"
+	fmt.Println(greet(userName))
+}
+
+
+
+packagemainimport"s"typePersonstruct{NamestringAgeint}funcv(vstring)string{v:="s"+vreturnv}funcv(){v:="s"v.Println(v(v))}

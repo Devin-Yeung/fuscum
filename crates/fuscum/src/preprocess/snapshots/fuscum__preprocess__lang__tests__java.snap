@@ -1,0 +1,27 @@
+---
+source: crates/fuscum/src/preprocess/lang.rs
+expression: "&format!(\"{src}\\n\\n\\n{res}\")"
+snapshot_kind: text
+---
+// This is a Java comment
+public class HelloWorld {
+    private String message;
+    
+    public HelloWorld(String msg) {
+        this.message = msg;
+    }
+    
+    public void greet(String name) {
+        String greeting = "Hello, " + name;
+        System.out.println(greeting);
+    }
+    
+    public static void main(String[] args) {
+        HelloWorld hello = new HelloWorld("Welcome");
+        hello.greet("World");
+    }
+}
+
+
+
+//ThisisaJavacommentpublicclassv{privateStringv;publicv(Stringv){this.v=v;}publicvoidv(Stringv){Stringv="s"+v;v.v.v(v);}publicstaticvoidv(String[]v){HelloWorldv=newHelloWorld("s");v.v("s");}}
