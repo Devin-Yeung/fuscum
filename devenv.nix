@@ -8,7 +8,13 @@
 
 {
   # https://devenv.sh/packages/
-  packages = with pkgs; [ cargo-deny ];
+  packages = with pkgs; [
+    cargo-deny
+    cargo-flamegraph
+    cargo-criterion
+    samply
+    gnuplot
+  ];
 
   # https://devenv.sh/languages/
   languages.rust.enable = true;
