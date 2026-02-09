@@ -22,7 +22,8 @@ impl Submission {
         let mut archive = File::open(&path)?;
         let mut buf = Vec::new();
         archive.read_to_end(&mut buf)?;
-        zip_extract::extract(Cursor::new(buf), dir.as_ref(), false)?;
+        let mut zip_archive = zip::ZipArchive::new(Cursor::new(buf))?;
+        zip_archive.extract(dir.as_ref())?;
         // get the name of the file
         let name = path
             .as_ref()

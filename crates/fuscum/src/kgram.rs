@@ -51,7 +51,7 @@ mod tests {
     fn std_k_gram() {
         let text = "adorunrunrunadorunrun";
         let k = 5;
-        let result = StdHashKgram.k_gram(&text.as_bytes(), k);
+        let result = StdHashKgram.k_gram(text.as_bytes(), k);
         insta::assert_debug_snapshot!(result);
     }
 
@@ -60,7 +60,7 @@ mod tests {
         let text = "adorunrunrunadorunrun";
         let k = 5;
         let r: RollingHashKgram<257, { u64::MAX }> = RollingHashKgram;
-        let result = r.k_gram(&text.as_bytes(), k);
+        let result = r.k_gram(text.as_bytes(), k);
         insta::assert_debug_snapshot!(result);
     }
 }

@@ -1,6 +1,6 @@
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 use fuscum::kgram::{Kgram, RollingHashKgram, StdHashKgram};
-use std::{hint::black_box, u64};
+use std::hint::black_box;
 
 /// Generate test data of specified size
 fn generate_test_data(size: usize) -> Vec<u8> {

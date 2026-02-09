@@ -9,7 +9,7 @@ pub struct NetworkTemplate<'a> {
 }
 
 impl NetworkTemplate<'_> {
-    pub fn new(data: &Vec<Summary>, threshold: f32) -> NetworkTemplate {
+    pub fn new(data: &Vec<Summary>, threshold: f32) -> NetworkTemplate<'_> {
         NetworkTemplate { data, threshold }
     }
 }
