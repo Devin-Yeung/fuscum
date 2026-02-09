@@ -2,7 +2,9 @@
 inputs:
   nixpkgs:
     url: github:cachix/devenv-nixpkgs/rolling
-
+  devenv:
+    # build failed in latest commit
+    url: github:cachix/devenv/2a443873e3747c769c7587214e1e613e90102d30
 # If you're using non-OSS software, you can set allowUnfree to true.
 # allowUnfree: true
 
