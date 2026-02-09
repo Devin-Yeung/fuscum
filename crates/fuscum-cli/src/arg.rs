@@ -35,7 +35,7 @@ impl Lang {
     }
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Clone, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Args {
     /// The directory to search for source files
@@ -53,6 +53,18 @@ pub struct Args {
     /// The threshold to consider two files similar
     #[arg(long, default_value = "0.4")]
     pub threshold: f32,
+
+    /// Number of top matches to preserve per file
+    #[arg(long, default_value = "3")]
+    pub top_k: usize,
+
+    /// Size of k-grams for fingerprinting
+    #[arg(long, default_value = "35")]
+    pub kgram_size: usize,
+
+    /// Window size for winnowing
+    #[arg(long, default_value = "40")]
+    pub window_size: usize,
 
     /// Write JSON results to this file
     #[arg(long)]
