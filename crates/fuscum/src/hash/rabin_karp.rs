@@ -2,30 +2,26 @@ use num_modular::{ModularCoreOps, ModularPow};
 
 use crate::hash::rolling_hasher::RollingHasher;
 
-pub struct RabinKarp {
-    k: usize,
-    base: u64,
-    modulus: u64,
+pub struct RabinKarp<const B: u64, const M: u64> {
     high_power: u64,
+    k: usize,
     hash: u64,
 }
 
-impl RabinKarp {
+impl<const B: u64, const M: u64> RabinKarp<B, M> {
     /// Creates a new Rabin-Karp hasher with the given window size k, base, and modulus.
-    pub fn new(k: usize, base: u64, modulus: u64) -> Self {
-        let high_power = base.powm((k - 1) as u64, &modulus);
+    pub fn new(k: usize) -> Self {
+        let high_power = B.powm((k - 1) as u64, &M);
 
         Self {
             k,
-            base,
-            modulus,
             high_power,
             hash: 0,
         }
     }
 }
 
-impl RollingHasher for RabinKarp {
+impl<const B: u64, const M: u64> RollingHasher for RabinKarp<B, M> {
     type Item = u8;
     type Hash = u64;
 
@@ -37,26 +33,23 @@ impl RollingHasher for RabinKarp {
         debug_assert_eq!(window.len(), self.k);
         self.hash = 0;
         for &b in window {
-            self.hash = self
-                .hash
-                .mulm(self.base, &self.modulus)
-                .addm(b as u64, &self.modulus);
+            self.hash = self.hash.mulm(&B, &M).addm(b as u64, &M);
         }
         self.hash
     }
 
     fn roll(&mut self, leaving: u8, entering: u8) -> u64 {
         // remove = leaving * b^(k-1) mod m
-        let remove = (leaving as u64).mulm(self.high_power, &self.modulus);
+        let remove = (leaving as u64).mulm(self.high_power, &M);
 
         // remove leaving byte
-        self.hash = self.hash.subm(remove, &self.modulus);
+        self.hash = self.hash.subm(remove, &M);
 
         // add entering byte
         self.hash = self
             .hash
-            .mulm(self.base, &self.modulus) // left shift
-            .addm(entering as u64, &self.modulus); // add entering byte
+            .mulm(B, &M) // left shift
+            .addm(entering as u64, &M); // add entering byte
 
         self.hash
     }
@@ -68,12 +61,12 @@ impl RollingHasher for RabinKarp {
 
 #[cfg(test)]
 mod tests {
-    use crate::hash::rolling_hasher::RollingHashIter;
+    use crate::hash::{rabin_karp::RabinKarp, rolling_hasher::RollingHashIter};
 
     #[test]
     fn it_works() {
         // M = 2^64, base = 257, k = 5
-        let hasher = super::RabinKarp::new(5, 257, u64::MAX);
+        let hasher: RabinKarp<257, { u64::MAX }> = super::RabinKarp::new(5);
         let data = b"hello world";
         let iter = RollingHashIter::new(data, hasher);
 

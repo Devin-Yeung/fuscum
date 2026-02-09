@@ -28,23 +28,11 @@ impl Kgram for StdHashKgram {
     }
 }
 
-pub struct RollingHashKgram {
-    base: u64,
-    modulus: u64,
-}
+pub struct RollingHashKgram<const B: u64, const M: u64>;
 
-impl Default for RollingHashKgram {
-    fn default() -> Self {
-        Self {
-            base: 257,
-            modulus: u64::MAX,
-        }
-    }
-}
-
-impl Kgram for RollingHashKgram {
+impl<const B: u64, const M: u64> Kgram for RollingHashKgram<B, M> {
     fn k_gram(&self, data: &[u8], k: usize) -> Vec<u64> {
-        let hasher = RabinKarp::new(k, self.base, self.modulus);
+        let hasher: RabinKarp<B, M> = RabinKarp::new(k);
         RollingHashIter::new(data, hasher)
             .map(|(_, hash)| hash)
             .collect()
@@ -67,7 +55,8 @@ mod tests {
     fn rolling_k_gram() {
         let text = "adorunrunrunadorunrun";
         let k = 5;
-        let result = RollingHashKgram::default().k_gram(&text.as_bytes(), k);
+        let r: RollingHashKgram<257, { u64::MAX }> = RollingHashKgram;
+        let result = r.k_gram(&text.as_bytes(), k);
         insta::assert_debug_snapshot!(result);
     }
 }

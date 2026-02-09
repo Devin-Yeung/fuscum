@@ -1,6 +1,6 @@
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 use fuscum::kgram::{Kgram, RollingHashKgram, StdHashKgram};
-use std::hint::black_box;
+use std::{hint::black_box, u64};
 
 /// Generate test data of specified size
 fn generate_test_data(size: usize) -> Vec<u8> {
@@ -42,7 +42,7 @@ fn bench_kgram_throughput(c: &mut Criterion) {
             &data,
             |b, data| {
                 b.iter(|| {
-                    let kgram = RollingHashKgram::default();
+                    let kgram: RollingHashKgram<257, { u64::MAX }> = RollingHashKgram;
                     black_box(kgram.k_gram(black_box(data), black_box(k)))
                 });
             },
@@ -75,7 +75,7 @@ fn bench_kgram_varying_k(c: &mut Criterion) {
         // Benchmark RollingHashKgram
         group.bench_with_input(BenchmarkId::new("RollingHashKgram", k), &data, |b, data| {
             b.iter(|| {
-                let kgram = RollingHashKgram::default();
+                let kgram: RollingHashKgram<257, { u64::MAX }> = RollingHashKgram;
                 black_box(kgram.k_gram(black_box(data), black_box(k)))
             });
         });
