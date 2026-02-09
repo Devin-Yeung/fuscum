@@ -1,6 +1,6 @@
 ---
-source: src/winnow.rs
-expression: "k_gram(text, k)"
+source: crates/fuscum/src/kgram.rs
+expression: result
 snapshot_kind: text
 ---
 [

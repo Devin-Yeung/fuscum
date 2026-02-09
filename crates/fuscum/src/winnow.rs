@@ -1,24 +1,4 @@
-use std::hash::{DefaultHasher, Hash, Hasher};
-
-pub fn k_gram(text: &str, k: usize) -> Vec<u64> {
-    let bytes = text.as_bytes();
-    let mut hashes = Vec::new();
-
-    // Return empty vector if k is larger than text length
-    if k > bytes.len() {
-        return hashes;
-    }
-
-    // Use windows() to safely iterate over byte slices
-    for window in bytes.windows(k) {
-        let mut hasher = DefaultHasher::new();
-        window.hash(&mut hasher);
-        hashes.push(hasher.finish());
-    }
-
-    hashes
-}
-
+/// Perform winnowing on a sequence of hash values, returning the selected fingerprints and their positions.
 pub fn winnowing<T>(hashes: T, window_size: usize) -> Vec<(u64, usize)>
 where
     T: AsRef<[u64]>,
@@ -56,8 +36,6 @@ fn rightmost_minimal(window: &[u64]) -> (u64, usize) {
 
 #[cfg(test)]
 mod tests {
-    use crate::winnow::k_gram;
-
     #[test]
     fn it_works() {
         let hashes = [
@@ -69,12 +47,5 @@ mod tests {
             // [(17, 3), (17, 6), (8, 8), (39, 11), (17, 15)]
             vec![(17, 3), (17, 6), (8, 8), (39, 11), (17, 15)]
         );
-    }
-
-    #[test]
-    fn k_gram_works() {
-        let text = "adorunrunrunadorunrun";
-        let k = 5;
-        insta::assert_debug_snapshot!(k_gram(text, k));
     }
 }

@@ -1,5 +1,6 @@
+use crate::kgram::Kgram;
 use crate::preprocess::Preprocessor;
-use crate::winnow::{k_gram, winnowing};
+use crate::winnow::winnowing;
 use std::collections::HashSet;
 
 pub struct FingerPrintConfig {
@@ -24,21 +25,25 @@ impl Default for FingerPrintConfig {
 
 #[derive(Eq, PartialEq)]
 pub struct FingerPrint {
-    pub(crate) fingerprints: Vec<(u64, usize)>,
+    fingerprints: Vec<(u64, usize)>,
+}
+
+pub struct FingerPrintGenerator<P: Preprocessor, K: Kgram> {
+    pub config: FingerPrintConfig,
+    pub preprocessor: P,
+    pub kgram: K,
+}
+
+impl<P: Preprocessor, K: Kgram> FingerPrintGenerator<P, K> {
+    pub fn generate<S: AsRef<str>>(&self, src: S) -> FingerPrint {
+        let preprocessed = self.preprocessor.preprocess(src.as_ref());
+        let k_grams = self.kgram.k_gram(preprocessed.as_bytes(), self.config.k);
+        let fingerprints = winnowing(k_grams, self.config.window_size);
+        FingerPrint { fingerprints }
+    }
 }
 
 impl FingerPrint {
-    pub fn new<P, S>(src: S, pp: P, config: FingerPrintConfig) -> Self
-    where
-        P: Preprocessor,
-        S: AsRef<str>,
-    {
-        let src = pp.preprocess(src.as_ref());
-        let hashes = k_gram(&src, config.k);
-        let fingerprints = winnowing(&hashes, config.window_size);
-        Self { fingerprints }
-    }
-
     pub fn similarity(&self, other: &Self) -> f32 {
         let cur = self.hashes();
         let other = other.hashes();
@@ -59,16 +64,18 @@ impl FingerPrint {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::preprocess::PythonPreprocessor;
+    use crate::{kgram::default_rolling_kgram, preprocess::PythonPreprocessor};
 
     #[test]
     fn it_works() {
         let src = "def f(a, b, c):\n\ta = 1";
-        let fp = FingerPrint::new(
-            src,
-            PythonPreprocessor::default(),
-            FingerPrintConfig::new(3, 3),
-        );
+        let gen = FingerPrintGenerator {
+            config: FingerPrintConfig::new(3, 3),
+            preprocessor: PythonPreprocessor::default(),
+            kgram: default_rolling_kgram(),
+        };
+
+        let fp = gen.generate(src);
         insta::assert_debug_snapshot!(fp.fingerprints());
     }
 }

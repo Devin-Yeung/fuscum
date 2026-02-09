@@ -1,27 +1,27 @@
 ---
-source: src/fingerprint.rs
+source: crates/fuscum/src/fingerprint.rs
 expression: fp.fingerprints()
 snapshot_kind: text
 ---
 [
     (
-        2705340117736394887,
-        3,
+        6697281,
+        1,
     ),
     (
-        3920545290344531422,
+        2672330,
         4,
     ),
     (
-        7474466245227027002,
+        2936526,
         6,
     ),
     (
-        6232942014095418042,
+        2936523,
         8,
     ),
     (
-        4943956192894222510,
-        9,
+        2723033,
+        10,
     ),
 ]
