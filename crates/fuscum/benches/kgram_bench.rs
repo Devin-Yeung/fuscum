@@ -58,12 +58,11 @@ fn bench_kgram_varying_k(c: &mut Criterion) {
     // Fixed data size, varying k values
     let size = 100_000;
     let data = generate_test_data(size);
-    let k_values = vec![10, 100, 1000];
+    let k_values = vec![10, 50];
+
+    group.throughput(Throughput::Bytes(size as u64));
 
     for k in k_values {
-        // Set throughput to measure bytes per second
-        group.throughput(Throughput::Bytes(size as u64));
-
         // Benchmark StdHashKgram
         group.bench_with_input(BenchmarkId::new("StdHashKgram", k), &data, |b, data| {
             b.iter(|| {
@@ -72,13 +71,30 @@ fn bench_kgram_varying_k(c: &mut Criterion) {
             });
         });
 
-        // Benchmark RollingHashKgram
-        group.bench_with_input(BenchmarkId::new("RollingHashKgram", k), &data, |b, data| {
-            b.iter(|| {
-                let kgram: RollingHashKgram<257, { u64::MAX }> = RollingHashKgram;
-                black_box(kgram.k_gram(black_box(data), black_box(k)))
-            });
-        });
+        // Benchmark RollingHashKgram with wrapping arithmetic
+        group.bench_with_input(
+            BenchmarkId::new("RollingHashKgramWrapping", k),
+            &data,
+            |b, data| {
+                b.iter(|| {
+                    let kgram: RollingHashKgram<257, { u64::MAX }> = RollingHashKgram;
+                    black_box(kgram.k_gram(black_box(data), black_box(k)))
+                });
+            },
+        );
+
+        // Benchmark RollingHashKgram with Mersenne Primes
+        const MERSENNE_PRIME_61: u64 = (1u64 << 61) - 1;
+        group.bench_with_input(
+            BenchmarkId::new("RollingHashKgramMersenne", k),
+            &data,
+            |b, data| {
+                b.iter(|| {
+                    let kgram: RollingHashKgram<257, MERSENNE_PRIME_61> = RollingHashKgram;
+                    black_box(kgram.k_gram(black_box(data), black_box(k)))
+                });
+            },
+        );
     }
 
     group.finish();
