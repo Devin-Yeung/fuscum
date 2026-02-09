@@ -1,73 +1,109 @@
 mod arg;
-mod submission;
 mod summary;
 mod visual;
 
-use crate::submission::Submission;
-use crate::summary::{SourceSummary, Summary};
-use crate::visual::NetworkTemplate;
+use std::fs;
+
+use anyhow::{Context, Result};
 use clap::Parser;
-use fuscum::doc::MultiDoc;
-use glob::glob;
+use fuscum::fingerprint::{FingerPrint, FingerPrintConfig, FingerPrintGenerator, WithFingerprint};
+use fuscum::kgram::default_rolling_kgram;
 use rayon::prelude::*;
 use rinja::Template;
-use std::cmp::Ordering;
 
-fn main() {
+use crate::summary::{PairSummary, Summary};
+use crate::visual::NetworkTemplate;
+
+fn main() -> Result<()> {
     let args = arg::Args::parse();
 
-    let docs = glob(&args.pat)
-        .expect("Failed to read glob pattern")
-        .filter_map(|glob| glob.ok())
-        .collect::<Vec<_>>()
-        .par_iter()
-        .map(|path| Submission::new(path).ok())
-        .filter_map(|submission| submission.map(Submission::into))
-        .collect::<Vec<MultiDoc>>();
+    // Glob for files and generate fingerprints
+    let full_pat = args.dir.join(&args.pat);
+    let full_pat = full_pat.to_string_lossy();
+    let paths: Vec<_> = glob::glob(&full_pat)
+        .context("invalid glob pattern")?
+        .filter_map(Result::ok)
+        .collect();
 
-    let mut results = docs
+    let fingerprints: Vec<(String, FingerPrint)> = paths
         .par_iter()
-        .enumerate()
-        .map(|(i, base)| {
-            let mut sims = docs
-                .par_iter()
-                .enumerate()
-                .filter_map(|(j, against)| match i.cmp(&j) {
-                    Ordering::Equal => None,
-                    _ => Some(base.similarity(against)),
+        .map(|path| {
+            let preprocessor = args.lang.preprocessor();
+            let gen = FingerPrintGenerator {
+                config: FingerPrintConfig::default(),
+                preprocessor,
+                kgram: default_rolling_kgram(),
+            };
+            let name = path.file_name().unwrap().to_string_lossy().to_string();
+            println!("Processing {}", name);
+            let src = fs::read_to_string(path)
+                .with_context(|| format!("failed to read {}", path.display()))
+                .unwrap();
+            let fp = gen.generate(&src);
+            (name, fp)
+        })
+        .collect();
+
+    // Compute similarities in parallel
+    let mut summaries: Vec<Summary> = fingerprints
+        .par_iter()
+        .map(|(name, fp)| {
+            let mut pairs: Vec<PairSummary> = fingerprints
+                .iter()
+                .filter(|(other_name, _)| other_name != name)
+                .map(|(other_name, other_fp)| PairSummary {
+                    against: other_name.clone(),
+                    score: fp.similarity(other_fp),
                 })
-                .collect::<Vec<_>>();
-            // take top 3 similar docs
-            sims.sort_by(|a, b| b.score().total_cmp(&a.score()));
-            let against: Vec<_> = sims.into_iter().take(3).map(|s| s.into()).collect();
+                .collect();
+
+            pairs.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap());
+            pairs.truncate(3);
+
+            let max_score = pairs.first().map(|p| p.score).unwrap_or(0.0);
+
             Summary {
-                base: base.name().to_string(),
-                max_score: against
-                    .iter()
-                    .map(|s: &SourceSummary| s.score)
-                    .reduce(f32::max)
-                    .unwrap(),
-                against,
+                base: name.clone(),
+                max_score,
+                against: pairs,
             }
         })
-        .collect::<Vec<_>>();
+        .collect();
 
-    results.sort_by(|a, b| b.score().total_cmp(&a.score()));
-    let results = results
-        .into_iter()
-        .filter(|r| r.max_score > args.threshold)
-        .collect::<Vec<_>>();
+    summaries.sort_by(|a, b| b.max_score.partial_cmp(&a.max_score).unwrap());
+    summaries.retain(|s| s.max_score >= args.threshold);
 
-    for result in &results {
-        println!("{}: {}", result.base, result.score());
+    // Print human-readable table
+    println!("{:<30} {:>10}", "File", "Max Score");
+    println!("{}", "-".repeat(42));
+    for s in &summaries {
+        println!("{:<30} {:>10.4}", s.base, s.max_score);
+        for p in &s.against {
+            println!("  {:<28} {:>10.4}", p.against, p.score);
+        }
     }
 
-    println!("{} in total", results.len());
-    // write to a json file and render the network visualization
-    let json = serde_json::to_string_pretty(&results).expect("should serialize to json");
-    let vis = NetworkTemplate::new(&results, args.threshold)
-        .render()
-        .expect("should render network template");
-    std::fs::write("results.json", json).expect("should write to file");
-    std::fs::write("network.html", vis).expect("should write to file");
+    // Optional JSON output
+    if let Some(json_path) = &args.json {
+        let json = serde_json::to_string_pretty(&summaries)?;
+        fs::write(json_path, json)
+            .with_context(|| format!("failed to write {}", json_path.display()))?;
+        println!("\nJSON written to {}", json_path.display());
+    }
+
+    // Optional network visualization
+    if let Some(network_path) = &args.network {
+        let template = NetworkTemplate::new(&summaries, args.threshold);
+        let rendered = template
+            .render()
+            .context("failed to render network template")?;
+        fs::write(network_path, rendered)
+            .with_context(|| format!("failed to write {}", network_path.display()))?;
+        println!(
+            "Network visualization written to {}",
+            network_path.display()
+        );
+    }
+
+    Ok(())
 }
