@@ -39,6 +39,10 @@ impl<const B: u64, const M: u64> Kgram for RollingHashKgram<B, M> {
     }
 }
 
+pub fn default_rolling_kgram() -> RollingHashKgram<257, { u64::MAX }> {
+    RollingHashKgram
+}
+
 #[cfg(test)]
 mod tests {
     use crate::kgram::{Kgram, RollingHashKgram, StdHashKgram};

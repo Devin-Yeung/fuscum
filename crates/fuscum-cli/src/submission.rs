@@ -1,7 +1,7 @@
 use anyhow::Result;
 use fuscum::doc::{Doc, MultiDoc};
-use fuscum::fingerprint;
-use fuscum::fingerprint::FingerPrint;
+use fuscum::fingerprint::{self, FingerPrintConfig};
+use fuscum::kgram::default_rolling_kgram;
 use fuscum::preprocess::{CPreprocessor, Preprocessor, PythonPreprocessor};
 use std::fs::File;
 use std::io::{Cursor, Read};
@@ -66,12 +66,14 @@ impl From<Submission> for MultiDoc {
                 };
 
                 let content = std::fs::read_to_string(entry.path()).ok()?;
-                let finger_print = FingerPrint::new(
-                    content,
-                    preprocessor?,
-                    fingerprint::FingerPrintConfig::default(),
-                );
-                Some(Doc::new(name, finger_print))
+                let gen = fingerprint::FingerPrintGenerator {
+                    config: FingerPrintConfig::default(),
+                    preprocessor: preprocessor.unwrap(),
+                    kgram: default_rolling_kgram(),
+                };
+
+                let fingerprint = gen.generate(&content);
+                Some(Doc::new(name, fingerprint))
             })
             .for_each(|doc| docs.add_doc(doc));
 
