@@ -445,6 +445,7 @@ dependencies = [
  "ast-grep-core",
  "ast-grep-language",
  "insta",
+ "num-modular",
  "typed-builder",
 ]
 
@@ -708,6 +709,12 @@ name = "num-conv"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf97ec579c3c42f953ef76dbf8d55ac91fb219dde70e49aa4a6b7d74e9919050"
+
+[[package]]
+name = "num-modular"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "17bb261bf36fa7d83f4c294f834e91256769097b3cb505d44831e0a179ac647f"
 
 [[package]]
 name = "once_cell"
