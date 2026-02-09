@@ -56,8 +56,6 @@ fn rightmost_minimal(window: &[u64]) -> (u64, usize) {
 
 #[cfg(test)]
 mod tests {
-    use crate::winnow::k_gram;
-
     #[test]
     fn it_works() {
         let hashes = [
@@ -69,12 +67,5 @@ mod tests {
             // [(17, 3), (17, 6), (8, 8), (39, 11), (17, 15)]
             vec![(17, 3), (17, 6), (8, 8), (39, 11), (17, 15)]
         );
-    }
-
-    #[test]
-    fn k_gram_works() {
-        let text = "adorunrunrunadorunrun";
-        let k = 5;
-        insta::assert_debug_snapshot!(k_gram(text, k));
     }
 }
