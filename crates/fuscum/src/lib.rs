@@ -1,4 +1,3 @@
-pub mod doc;
 pub mod fingerprint;
 pub mod hash;
 pub mod kgram;

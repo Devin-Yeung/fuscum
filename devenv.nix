@@ -12,6 +12,7 @@
     cargo-deny
     cargo-flamegraph
     cargo-criterion
+    cargo-machete
     samply
     gnuplot
   ];

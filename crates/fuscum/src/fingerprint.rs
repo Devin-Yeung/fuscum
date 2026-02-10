@@ -3,6 +3,22 @@ use crate::preprocess::Preprocessor;
 use crate::winnow::winnowing;
 use std::collections::HashSet;
 
+pub trait WithFingerprint {
+    type Hash: std::hash::Hash + Eq;
+    /// The fingerprint of the object, which is a set of hashes
+    fn fingerprint(&self) -> HashSet<Self::Hash>;
+
+    /// Calculate the similarity between two objects
+    /// The similarity is calculated as the intersection of the hashes over the base
+    fn similarity<S: WithFingerprint<Hash = Self::Hash>>(&self, against: &S) -> f32 {
+        let base = self.fingerprint();
+        let against = against.fingerprint();
+
+        let intersection = base.intersection(&against).count() as f32;
+        intersection / base.len() as f32
+    }
+}
+
 pub struct FingerPrintConfig {
     pub k: usize,
     pub window_size: usize,
@@ -25,7 +41,7 @@ impl Default for FingerPrintConfig {
 
 #[derive(Eq, PartialEq)]
 pub struct FingerPrint {
-    fingerprints: Vec<(u64, usize)>,
+    raw_fingerprint: Vec<(u64, usize)>,
 }
 
 pub struct FingerPrintGenerator<P: Preprocessor, K: Kgram> {
@@ -39,25 +55,29 @@ impl<P: Preprocessor, K: Kgram> FingerPrintGenerator<P, K> {
         let preprocessed = self.preprocessor.preprocess(src.as_ref());
         let k_grams = self.kgram.k_gram(preprocessed.as_bytes(), self.config.k);
         let fingerprints = winnowing(k_grams, self.config.window_size);
-        FingerPrint { fingerprints }
+        FingerPrint {
+            raw_fingerprint: fingerprints,
+        }
     }
 }
 
 impl FingerPrint {
-    pub fn similarity(&self, other: &Self) -> f32 {
-        let cur = self.hashes();
-        let other = other.hashes();
-
-        let intersection = cur.intersection(&other).count() as f32;
-        intersection / cur.len() as f32
+    /// Return the fingerprint as a set of hashes, without their positions
+    pub fn fingerprint(&self) -> HashSet<u64> {
+        self.raw_fingerprint.iter().map(|(hash, _)| *hash).collect()
     }
 
-    pub fn hashes(&self) -> HashSet<u64> {
-        self.fingerprints.iter().map(|(hash, _)| *hash).collect()
+    /// Return the raw fingerprints with their positions
+    pub fn raw_fingerprint(&self) -> &[(u64, usize)] {
+        &self.raw_fingerprint
     }
+}
 
-    pub fn fingerprints(&self) -> &[(u64, usize)] {
-        &self.fingerprints
+impl WithFingerprint for FingerPrint {
+    type Hash = u64;
+
+    fn fingerprint(&self) -> HashSet<Self::Hash> {
+        self.fingerprint()
     }
 }
 
@@ -76,6 +96,6 @@ mod tests {
         };
 
         let fp = gen.generate(src);
-        insta::assert_debug_snapshot!(fp.fingerprints());
+        insta::assert_debug_snapshot!(fp.raw_fingerprint());
     }
 }
