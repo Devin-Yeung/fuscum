@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
-use clap::Parser;
+use clap::{Parser, Subcommand};
+use clap_complete::shells::Shell;
 use fuscum::preprocess::{
     CPreprocessor, CppPreprocessor, GoPreprocessor, JavaPreprocessor, JavaScriptPreprocessor,
     PythonPreprocessor, RubyPreprocessor, RustPreprocessor, TypeScriptPreprocessor,
@@ -36,7 +37,6 @@ impl Lang {
 }
 
 #[derive(Parser, Clone, Debug)]
-#[command(version, about, long_about = None)]
 pub struct Args {
     /// The directory to search for source files
     #[arg(default_value = ".")]
@@ -73,4 +73,23 @@ pub struct Args {
     /// Write network visualization HTML to this file
     #[arg(long)]
     pub network: Option<PathBuf>,
+}
+
+#[derive(Parser)]
+#[command(version, about, long_about = None)]
+pub struct Cli {
+    #[command(subcommand)]
+    pub command: Commands,
+}
+
+#[derive(Subcommand)]
+pub enum Commands {
+    /// Run similarity detection
+    Scan(Args),
+    /// Generate shell completions
+    Completions {
+        /// The shell to generate completions for
+        #[arg(value_enum)]
+        shell: Shell,
+    },
 }
