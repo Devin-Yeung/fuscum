@@ -54,6 +54,7 @@
         enable = true;
       };
       nixfmt.enable = true;
+      taplo.enable = true;
     };
     package = pkgs.prek;
   };
