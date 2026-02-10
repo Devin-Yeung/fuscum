@@ -329,7 +329,27 @@
         "nixpkgs": "nixpkgs_2",
         "pre-commit-hooks": [
           "git-hooks"
+        ],
+        "rust-overlay": "rust-overlay"
+      }
+    },
+    "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
         ]
+      },
+      "locked": {
+        "lastModified": 1770693064,
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "a5f6d8a6a6868db2a3055cfe2b5dd01422780433",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
       }
     },
     "treefmt-nix": {

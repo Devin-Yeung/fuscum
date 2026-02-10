@@ -17,7 +17,12 @@
   ];
 
   # https://devenv.sh/languages/
-  languages.rust.enable = true;
+  languages = {
+    rust = {
+      enable = true;
+      channel = "nightly";
+    };
+  };
 
   # https://devenv.sh/scripts/
   enterShell = ''
