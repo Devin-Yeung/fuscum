@@ -21,7 +21,7 @@
   languages = {
     rust = {
       enable = true;
-      channel = "nightly";
+      toolchainFile = ./rust-toolchain.toml;
     };
   };
 
@@ -42,8 +42,20 @@
   # pre-commit.hooks.shellcheck.enable = true;
   git-hooks = {
     hooks = {
-      clippy.enable = true;
-      rustfmt.enable = true;
+      clippy = {
+        packageOverrides = {
+          cargo = config.languages.rust.toolchainPackage;
+          clippy = config.languages.rust.toolchainPackage;
+        };
+        enable = true;
+      };
+      rustfmt = {
+        packageOverrides = {
+          cargo = config.languages.rust.toolchainPackage;
+          rustfmt = config.languages.rust.toolchainPackage;
+        };
+        enable = true;
+      };
       nixfmt.enable = true;
     };
     package = pkgs.prek;
