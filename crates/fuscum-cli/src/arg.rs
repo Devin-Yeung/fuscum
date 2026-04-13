@@ -20,6 +20,13 @@ pub enum Lang {
     Ruby,
 }
 
+#[derive(clap::ValueEnum, Clone, Debug, Default)]
+pub enum Hash {
+    #[default]
+    Rolling,
+    Std,
+}
+
 impl Lang {
     pub fn preprocessor(&self) -> Box<dyn fuscum::preprocess::Preprocessor> {
         match self {
@@ -65,6 +72,10 @@ pub struct Args {
     /// Window size for winnowing
     #[arg(long, default_value = "40")]
     pub window_size: usize,
+
+    /// Hash algorithm to use for k-gram fingerprinting
+    #[arg(long, value_enum, default_value = "rolling")]
+    pub hash: Hash,
 
     /// Write JSON results to this file
     #[arg(long)]

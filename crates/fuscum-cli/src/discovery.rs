@@ -3,10 +3,10 @@ use std::path::PathBuf;
 
 use anyhow::{Context, Result};
 use fuscum::fingerprint::{FingerPrint, FingerPrintConfig, FingerPrintGenerator};
-use fuscum::kgram::default_rolling_kgram;
+use fuscum::kgram::{default_rolling_kgram, StdHashKgram};
 use rayon::prelude::*;
 
-use crate::arg::Args;
+use crate::arg::{Args, Hash};
 
 pub struct Submission {
     pub name: String,
@@ -37,10 +37,14 @@ impl FileDiscovery {
             .par_iter()
             .map(|path| {
                 let preprocessor = self.args.lang.preprocessor();
+                let kgram: Box<dyn fuscum::kgram::Kgram> = match self.args.hash {
+                    Hash::Rolling => Box::new(default_rolling_kgram()),
+                    Hash::Std => Box::new(StdHashKgram),
+                };
                 let gen = FingerPrintGenerator {
                     config: FingerPrintConfig::new(self.args.kgram_size, self.args.window_size),
                     preprocessor,
-                    kgram: default_rolling_kgram(),
+                    kgram,
                 };
                 let name = path.file_name().unwrap().to_string_lossy().to_string();
                 println!("Processing {}", name);

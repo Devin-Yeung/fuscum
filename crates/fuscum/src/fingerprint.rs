@@ -44,13 +44,13 @@ pub struct FingerPrint {
     raw_fingerprint: Vec<(u64, usize)>,
 }
 
-pub struct FingerPrintGenerator<P: Preprocessor, K: Kgram> {
+pub struct FingerPrintGenerator<P: Preprocessor> {
     pub config: FingerPrintConfig,
     pub preprocessor: P,
-    pub kgram: K,
+    pub kgram: Box<dyn Kgram>,
 }
 
-impl<P: Preprocessor, K: Kgram> FingerPrintGenerator<P, K> {
+impl<P: Preprocessor> FingerPrintGenerator<P> {
     pub fn generate<S: AsRef<str>>(&self, src: S) -> FingerPrint {
         let preprocessed = self.preprocessor.preprocess(src.as_ref());
         let k_grams = self.kgram.k_gram(preprocessed.as_bytes(), self.config.k);
@@ -92,7 +92,7 @@ mod tests {
         let gen = FingerPrintGenerator {
             config: FingerPrintConfig::new(3, 3),
             preprocessor: PythonPreprocessor::default(),
-            kgram: default_rolling_kgram(),
+            kgram: Box::new(default_rolling_kgram()),
         };
 
         let fp = gen.generate(src);
