@@ -84,10 +84,13 @@ impl WithFingerprint for FingerPrint {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{kgram::default_rolling_kgram, preprocess::PythonPreprocessor};
+    use crate::kgram::default_rolling_kgram;
 
+    #[cfg(feature = "ast")]
     #[test]
     fn it_works() {
+        use crate::preprocess::PythonPreprocessor;
+
         let src = "def f(a, b, c):\n\ta = 1";
         let gen = FingerPrintGenerator {
             config: FingerPrintConfig::new(3, 3),
