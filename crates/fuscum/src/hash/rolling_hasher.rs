@@ -128,4 +128,41 @@ impl<'a, H: RollingHasher<Item = u8>> Iterator for RollingHashIter<'a, H> {
 
         Some((start, hash))
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        // the exact size of the iterator is known
+        let size = (self.data.len() - self.pos).saturating_sub(self.k - 1);
+        (size, Some(size))
+    }
+}
+
+impl<'a, H: RollingHasher<Item = u8>> ExactSizeIterator for RollingHashIter<'a, H> {}
+
+#[cfg(test)]
+mod tests {
+    use crate::hash::{rabin_karp::RabinKarp, rolling_hasher::RollingHashIter};
+
+    #[test]
+    fn iterator_size_hint_non_empty() {
+        let data: [u8; 6] = [0, 1, 2, 3, 4, 5];
+        let hasher: RabinKarp<257, { u64::MAX }> = RabinKarp::new(3);
+        let iter = RollingHashIter::new(&data, hasher);
+
+        // check that the size_hint given is consistent with the length of the iterator
+        assert_eq!(iter.size_hint(), (4, Some(4)));
+        let collected: Vec<_> = iter.collect();
+        assert_eq!(collected.len(), 4);
+    }
+
+    #[test]
+    fn iterator_size_hint_empty() {
+        let data: [u8; 6] = [0, 1, 2, 3, 4, 5];
+        let hasher: RabinKarp<257, { u64::MAX }> = RabinKarp::new(10);
+        let iter = RollingHashIter::new(&data, hasher);
+
+        // check that the size_hint given is consistent with the length of the iterator
+        assert_eq!(iter.size_hint(), (0, Some(0)));
+        let collected: Vec<_> = iter.collect();
+        assert!(collected.is_empty());
+    }
 }

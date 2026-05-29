@@ -12,7 +12,7 @@ pub struct StdHashKgram;
 
 impl Kgram for StdHashKgram {
     fn k_gram(&self, data: &[u8], k: usize) -> Vec<u64> {
-        let mut hashes = Vec::new();
+        let mut hashes = Vec::with_capacity(data.len().saturating_sub(k - 1));
 
         if k > data.len() {
             return hashes;
