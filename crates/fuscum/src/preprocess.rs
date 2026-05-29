@@ -9,11 +9,11 @@ mod tree;
 pub use lang::*;
 
 pub trait Preprocessor {
-    fn preprocess(&self, src: &str) -> Cow<'_, str>;
+    fn preprocess<'a>(&self, src: &'a str) -> Cow<'a, str>;
 }
 
 impl Preprocessor for Box<dyn Preprocessor> {
-    fn preprocess(&self, src: &str) -> Cow<'_, str> {
+    fn preprocess<'a>(&self, src: &'a str) -> Cow<'a, str> {
         self.as_ref().preprocess(src)
     }
 }
