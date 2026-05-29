@@ -414,6 +414,7 @@ dependencies = [
  "criterion",
  "insta",
  "num-modular",
+ "regex",
  "typed-builder",
 ]
 

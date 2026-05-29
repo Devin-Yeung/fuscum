@@ -84,14 +84,31 @@ impl WithFingerprint for FingerPrint {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{kgram::default_rolling_kgram, preprocess::PythonPreprocessor};
+    use crate::kgram::default_rolling_kgram;
+    use crate::preprocess::RegexPreprocessor;
 
+    #[cfg(feature = "ast")]
     #[test]
     fn it_works() {
+        use crate::preprocess::PythonPreprocessor;
+
         let src = "def f(a, b, c):\n\ta = 1";
         let gen = FingerPrintGenerator {
             config: FingerPrintConfig::new(3, 3),
             preprocessor: PythonPreprocessor::default(),
+            kgram: Box::new(default_rolling_kgram()),
+        };
+
+        let fp = gen.generate(src);
+        insta::assert_debug_snapshot!(fp.raw_fingerprint());
+    }
+
+    #[test]
+    fn with_text_preprocessor() {
+        let src = "how much wood could a woodchuck chuck";
+        let gen = FingerPrintGenerator {
+            config: FingerPrintConfig::new(3, 3),
+            preprocessor: RegexPreprocessor::whitespace(),
             kgram: Box::new(default_rolling_kgram()),
         };
 
