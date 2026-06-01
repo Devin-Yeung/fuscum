@@ -27,7 +27,7 @@ fn rightmost_minimal(window: &[u64]) -> (u64, usize) {
     let mut min = u64::MAX;
     let mut idx = 0usize;
     for (i, &hash) in window.iter().enumerate() {
-        if hash < min {
+        if hash <= min {
             min = hash;
             idx = i;
         }
@@ -37,6 +37,13 @@ fn rightmost_minimal(window: &[u64]) -> (u64, usize) {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
+    #[test]
+    fn rightmost_minimal_works() {
+        assert_eq!(rightmost_minimal(&[3, 2, 5, 2]), (2, 3));
+    }
+
     #[test]
     fn it_works() {
         let hashes = [
