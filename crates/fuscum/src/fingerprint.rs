@@ -20,13 +20,22 @@ pub trait WithFingerprint {
 }
 
 pub struct FingerPrintConfig {
+    /// the size of the k-grams to hash
     pub k: usize,
+    /// the number of consecutive hashes to consider in one window
     pub window_size: usize,
+    /// whether to use robust winnowing, a variant of the winnowing algorithm
+    /// which reduces fingerprint size when long low-entropy sequences are present
+    pub robust: bool,
 }
 
 impl FingerPrintConfig {
     pub fn new(k: usize, window_size: usize) -> Self {
-        Self { k, window_size }
+        Self {
+            k,
+            window_size,
+            robust: false,
+        }
     }
 }
 
@@ -35,6 +44,7 @@ impl Default for FingerPrintConfig {
         Self {
             k: 35,
             window_size: 40,
+            robust: false,
         }
     }
 }
@@ -54,7 +64,7 @@ impl<P: Preprocessor> FingerPrintGenerator<P> {
     pub fn generate<S: AsRef<str>>(&self, src: S) -> FingerPrint {
         let preprocessed = self.preprocessor.preprocess(src.as_ref());
         let k_grams = self.kgram.k_gram(preprocessed.as_bytes(), self.config.k);
-        let fingerprints = winnowing(k_grams, self.config.window_size);
+        let fingerprints = winnowing(k_grams, self.config.window_size, self.config.robust);
         FingerPrint {
             raw_fingerprint: fingerprints,
         }
