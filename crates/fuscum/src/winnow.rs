@@ -5,15 +5,16 @@ where
 {
     let seq = hashes.as_ref();
     let mut finger_prints = Vec::new();
-    // the global position of the minimum hash value in the *previous* window
-    let mut idx = 0usize;
 
     for i in 0..seq.len().saturating_sub(window_size) {
         let window = &seq[i..i + window_size];
         let (min_hash, min_idx) = rightmost_minimal(window);
-        if idx != i + min_idx {
-            // make sure it's not the same as the last window
-            idx = i + min_idx;
+        let idx = i + min_idx;
+        // only store a hash if it's not the same as in the previous window
+        if finger_prints
+            .last()
+            .is_none_or(|(_, previous_position)| *previous_position != idx)
+        {
             finger_prints.push((min_hash, idx));
         }
     }

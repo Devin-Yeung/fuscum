@@ -4,6 +4,10 @@ expression: fp.raw_fingerprint()
 ---
 [
     (
+        6897742,
+        0,
+    ),
+    (
         7229509,
         3,
     ),
