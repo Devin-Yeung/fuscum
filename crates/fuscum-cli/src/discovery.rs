@@ -42,7 +42,10 @@ impl FileDiscovery {
                     Hash::Std => Box::new(StdHashKgram),
                 };
                 let gen = FingerPrintGenerator {
-                    config: FingerPrintConfig::new(self.args.kgram_size, self.args.window_size),
+                    config: FingerPrintConfig::builder()
+                        .k(self.args.kgram_size)
+                        .window_size(self.args.window_size)
+                        .build(),
                     preprocessor,
                     kgram,
                 };

@@ -1,3 +1,5 @@
+use typed_builder::TypedBuilder;
+
 use crate::kgram::Kgram;
 use crate::preprocess::Preprocessor;
 use crate::winnow::winnowing;
@@ -19,33 +21,23 @@ pub trait WithFingerprint {
     }
 }
 
+#[derive(TypedBuilder)]
 pub struct FingerPrintConfig {
     /// the size of the k-grams to hash
+    #[builder(default = 35)]
     pub k: usize,
     /// the number of consecutive hashes to consider in one window
+    #[builder(default = 40)]
     pub window_size: usize,
     /// whether to use robust winnowing, a variant of the winnowing algorithm
     /// which reduces fingerprint size when long low-entropy sequences are present
+    #[builder(default = false)]
     pub robust: bool,
-}
-
-impl FingerPrintConfig {
-    pub fn new(k: usize, window_size: usize) -> Self {
-        Self {
-            k,
-            window_size,
-            robust: false,
-        }
-    }
 }
 
 impl Default for FingerPrintConfig {
     fn default() -> Self {
-        Self {
-            k: 35,
-            window_size: 40,
-            robust: false,
-        }
+        Self::builder().build()
     }
 }
 
@@ -104,7 +96,7 @@ mod tests {
 
         let src = "def f(a, b, c):\n\ta = 1";
         let gen = FingerPrintGenerator {
-            config: FingerPrintConfig::new(3, 3),
+            config: FingerPrintConfig::builder().k(3).window_size(3).build(),
             preprocessor: PythonPreprocessor::default(),
             kgram: Box::new(default_rolling_kgram()),
         };
@@ -117,7 +109,7 @@ mod tests {
     fn with_text_preprocessor() {
         let src = "how much wood could a woodchuck chuck";
         let gen = FingerPrintGenerator {
-            config: FingerPrintConfig::new(3, 3),
+            config: FingerPrintConfig::builder().k(3).window_size(3).build(),
             preprocessor: RegexPreprocessor::whitespace(),
             kgram: Box::new(default_rolling_kgram()),
         };
