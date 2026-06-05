@@ -1,9 +1,12 @@
 ---
 source: crates/fuscum/src/fingerprint.rs
-expression: fp.fingerprints()
-snapshot_kind: text
+expression: fp.raw_fingerprint()
 ---
 [
+    (
+        6630959,
+        0,
+    ),
     (
         6697281,
         1,
