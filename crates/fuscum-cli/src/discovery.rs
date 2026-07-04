@@ -37,7 +37,7 @@ impl FileDiscovery {
             .par_iter()
             .map(|path| {
                 let preprocessor = self.args.lang.preprocessor();
-                let kgram: Box<dyn fuscum::kgram::Kgram> = match self.args.hash {
+                let kgram: Box<dyn fuscum::kgram::Kgram + Sync + Send> = match self.args.hash {
                     Hash::Rolling => Box::new(default_rolling_kgram()),
                     Hash::Std => Box::new(StdHashKgram),
                 };
