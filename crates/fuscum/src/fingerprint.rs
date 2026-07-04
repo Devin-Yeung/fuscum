@@ -49,7 +49,7 @@ pub struct FingerPrint {
 pub struct FingerPrintGenerator<P: Preprocessor> {
     pub config: FingerPrintConfig,
     pub preprocessor: P,
-    pub kgram: Box<dyn Kgram>,
+    pub kgram: Box<dyn Kgram + Sync + Send>,
 }
 
 impl<P: Preprocessor> FingerPrintGenerator<P> {
