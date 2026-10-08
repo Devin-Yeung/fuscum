@@ -17,7 +17,7 @@ impl<L: Language + Copy + LanguageExt> Tree<L> {
         }
     }
 
-    pub fn apply_edit_helper(&mut self, edits: Vec<Edit<String>>) -> String {
+    pub fn apply_edit_helper(&self, edits: Vec<Edit<String>>) -> String {
         debug_assert_ne!(edits.len(), 0);
         let mut new_content = String::new();
         let old_content = self.ag.root().root().get_text();
@@ -66,6 +66,68 @@ impl<L: Language + Copy + LanguageExt> Tree<L> {
         let pat = KindMatcher::new(kind.as_ref(), self.lang);
         let edits = self.ag.root().replace_all(&pat, to);
         self.apply_edits(edits)
+    }
+
+    /// Single-parse variant of `remove_comments` + `subst_ident` + `subst_string`.
+    ///
+    /// All edits are collected against the original tree and applied to the text
+    /// once, so the file is parsed once and never re-parsed.
+    /// When edits overlap (e.g. an identifier inside an f-string that is replaced as a
+    /// whole), the outermost edit wins, which matches the sequential behaviour.
+    pub fn rewrite_single_pass(
+        &self,
+        comment: Option<&str>,
+        ident: Option<(&str, &str)>,
+        string: Option<(&str, &str)>,
+    ) -> String {
+        let root = self.ag.root();
+        let mut edits: Vec<Edit<String>> = Vec::new();
+        if let Some(kind) = comment {
+            let pat = KindMatcher::new(kind, self.lang);
+            edits.extend(root.find_all(&pat).map(|m| m.remove()));
+        }
+        if let Some((kind, to)) = ident {
+            let pat = KindMatcher::new(kind, self.lang);
+            edits.extend(root.replace_all(&pat, to));
+        }
+        if let Some((kind, to)) = string {
+            let pat = KindMatcher::new(kind, self.lang);
+            edits.extend(root.replace_all(&pat, to));
+        }
+
+        // Outermost-first: sort by start, longer first on ties. Tree nodes either
+        // are disjoint or nest, so an edit either starts after the kept edit ends
+        // (keep it) or lies inside it (drop it, the outer replacement covers it).
+        // Partial overlap should be impossible; assert it so it cannot pass silently.
+        edits.sort_by(|a, b| {
+            a.position
+                .cmp(&b.position)
+                .then(b.deleted_length.cmp(&a.deleted_length))
+        });
+        let mut kept: Vec<Edit<String>> = Vec::with_capacity(edits.len());
+        // end of the outermost kept edit
+        let mut end = 0usize;
+        for e in edits {
+            let e_end = e.position + e.deleted_length;
+            if e.position >= end {
+                end = e_end;
+                kept.push(e);
+            } else {
+                debug_assert!(
+                    e_end <= end,
+                    "partially overlapping edits: {:?} and {}..{}",
+                    kept.last()
+                        .map(|k| k.position..k.position + k.deleted_length),
+                    e.position,
+                    e_end
+                );
+            }
+        }
+        if kept.is_empty() {
+            return self.ag.source().to_string();
+        }
+        // The result is returned as text, so no re-parse is needed.
+        self.apply_edit_helper(kept)
     }
 
     pub fn source(&self) -> &str {
