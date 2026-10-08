@@ -38,28 +38,26 @@ macro_rules! impl_lang_preprocessor {
             }
         }
 
-        impl Preprocessor for $name {
-            fn preprocess<'a>(&self, src: &'a str) -> Cow<'a, str> {
-                let mut tree = Tree::new(src, $lang);
-
-                if self.remove_comments {
-                    tree.remove_comments($comment_token);
-                }
-
-                self.subst_var
-                    .as_ref()
-                    .map(|v| tree.subst_ident($identifier_token, v));
-
-                self.subst_string
-                    .as_ref()
-                    .map(|v| tree.subst_string($string_token, v));
-
-                let src = tree
-                    .source()
+        impl $name {
+            /// Same output as `preprocess`, but parses the source only once.
+            pub fn preprocess_single_pass<'a>(&self, src: &'a str) -> Cow<'a, str> {
+                let tree = Tree::new(src, $lang);
+                let rewritten = tree.rewrite_single_pass(
+                    self.remove_comments.then_some($comment_token),
+                    self.subst_var.as_deref().map(|v| ($identifier_token, v)),
+                    self.subst_string.as_deref().map(|v| ($string_token, v)),
+                );
+                let src = rewritten
                     .chars()
                     .filter(|c| !c.is_whitespace())
                     .collect::<String>();
                 Cow::Owned(src)
+            }
+        }
+
+        impl Preprocessor for $name {
+            fn preprocess<'a>(&self, src: &'a str) -> Cow<'a, str> {
+                self.preprocess_single_pass(src)
             }
         }
     };
