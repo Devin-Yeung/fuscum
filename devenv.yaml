@@ -1,13 +1,11 @@
 inputs:
-  devenv:
-    url: github:cachix/devenv/2a443873e3747c769c7587214e1e613e90102d30
   git-hooks:
     url: github:cachix/git-hooks.nix
     inputs:
       nixpkgs:
         follows: nixpkgs
   nixpkgs:
-    url: github:NixOS/nixpkgs/nixpkgs-unstable
+    url: https://flakehub.com/f/NixOS/nixpkgs/0.1.*.tar.gz
   rust-overlay:
     url: github:oxalica/rust-overlay
     inputs:
